@@ -2461,11 +2461,29 @@ function handle(ctx) {
     if (has(body.kitchenPrinterName)) { sets.push('kitchenPrinterName=?'); vals.push(truncate(body.kitchenPrinterName, 250)); }
     if (has(body.paymentPrinterName)) { sets.push('paymentPrinterName=?'); vals.push(truncate(body.paymentPrinterName, 250)); }
     if (has(body.qrPrinterName)) { sets.push('qrPrinterName=?'); vals.push(truncate(body.qrPrinterName, 250)); }
+    if (has(body.dailyReportEnabled)) { sets.push('dailyReportEnabled=?'); vals.push(body.dailyReportEnabled ? 1 : 0); }
+    if (has(body.dailyReportTime)) {
+      const t = String(body.dailyReportTime || '').trim();
+      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(t)) err('Daily report time must be HH:MM (24-hour), e.g. 23:30', 400);
+      sets.push('dailyReportTime=?'); vals.push(t);
+      // A time that has already passed today starts from tomorrow (no surprise print right now).
+      const now = new Date(); const [hh, mm] = t.split(':').map(Number);
+      if (now.getHours() * 60 + now.getMinutes() >= hh * 60 + mm) { sets.push('lastDailyReportDate=?'); vals.push(todayStr()); }
+    }
     if (sets.length) { db.prepare(`UPDATE settings SET ${sets.join(',')} WHERE id=1`).execute(vals); getSettings(true); }
     const s = getSettings();
-    jsonOut({ ok: true, printAgentUrl: s.printAgentUrl, printAgentEnabled: s.printAgentEnabled, printPaperWidth: s.printPaperWidth, kitchenPrinterName: s.kitchenPrinterName || '', paymentPrinterName: s.paymentPrinterName || '', qrPrinterName: s.qrPrinterName || '' });
+    jsonOut({ ok: true, printAgentUrl: s.printAgentUrl, printAgentEnabled: s.printAgentEnabled, printPaperWidth: s.printPaperWidth, kitchenPrinterName: s.kitchenPrinterName || '', paymentPrinterName: s.paymentPrinterName || '', qrPrinterName: s.qrPrinterName || '', dailyReportEnabled: s.dailyReportEnabled, dailyReportTime: s.dailyReportTime });
   }
 
+  // ── DAILY CARD & CASH BILLS ──────────────────────────────
+  if (method === 'GET' && uri === '/reports/daily-bills') {
+    requireRole(['admin', 'superManager', 'manager', 'cashier', 'finance'], user);
+    const d = /^\d{4}-\d{2}-\d{2}$/.test(String(query.date || '')) ? String(query.date) : todayStr();
+    const DB = require('./daily-bills'); const st = getSettings();
+    const rep = DB.collect(d, user.role === 'superManager' || user.role === 'admin' ? null : bid);
+    // Ready-made slips so the screen prints exactly what the 11:30 PM auto-print prints.
+    jsonOut(Object.assign(rep, { cardText: DB.slipText(rep, 'card', st, st.printPaperWidth), cashText: DB.slipText(rep, 'cash', st, st.printPaperWidth) }));
+  }
   // ── QR ORDERING SETTINGS ─────────────────────────────────
   if (method === 'PUT' && uri === '/qr/settings') {
     requireRole(['superManager', 'manager', 'admin'], user);

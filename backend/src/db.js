@@ -584,6 +584,9 @@ function migrate() {
   addCol('settings', 'kitchenPrinterName', "TEXT DEFAULT ''");
   addCol('settings', 'paymentPrinterName', "TEXT DEFAULT ''");
   addCol('settings', 'qrPrinterName', "TEXT DEFAULT ''");          // printer for table QR cards
+  addCol('settings', 'dailyReportEnabled', 'INTEGER DEFAULT 1');    // auto-print daily card & cash bills
+  addCol('settings', 'dailyReportTime', "TEXT DEFAULT '23:30'");    // HH:MM
+  addCol('settings', 'lastDailyReportDate', "TEXT DEFAULT ''");
   // QR table ordering: per-table scan-to-order.
   addCol('tables_list', 'qrToken', 'TEXT DEFAULT NULL');
   addCol('settings', 'publicBaseUrl', "TEXT DEFAULT ''");          // address the customer's phone uses

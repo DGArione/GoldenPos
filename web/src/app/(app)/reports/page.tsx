@@ -10,6 +10,7 @@ import { apiGet } from "@/lib/api";
 import { money, useSettings } from "@/lib/settings";
 import { PageHeader, PageLoader, EmptyState, Screen } from "@/components/ui";
 import { buildReportPdf, downloadBlob } from "@/lib/pdf";
+import DailyBillsButton from "@/components/DailyBillsButton";
 
 interface Advanced {
   period: { from: string; to: string };
@@ -159,6 +160,7 @@ export default function ReportsPage() {
     <div className="flex flex-col gap-3">
       <Screen>
         <PageHeader title="Reports" subtitle={`${from} → ${to}`} icon={BarChart3}>
+          <DailyBillsButton />
           <button onClick={exportCsv} className="btn btn-ghost btn-sm"><Download size={14} /> CSV</button>
           <button onClick={exportPdf} className="btn btn-ghost btn-sm"><Download size={14} /> PDF</button>
         </PageHeader>

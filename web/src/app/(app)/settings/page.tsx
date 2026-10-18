@@ -36,6 +36,8 @@ interface Settings {
   kitchenPrinterName?: string;
   paymentPrinterName?: string;
   qrPrinterName?: string;
+  dailyReportEnabled?: boolean;
+  dailyReportTime?: string;
 }
 
 interface QrNet { publicBaseUrl: string; suggestedUrl: string; lanUrls: string[]; ipMismatch: boolean }
@@ -151,13 +153,15 @@ export default function SettingsPage() {
     if (!s) return;
     setPrinterSaving(true); setPrinterMessage("");
     try {
-      const result = await apiPut<{ ok: boolean; printAgentUrl: string; printAgentEnabled: boolean; printPaperWidth: number; kitchenPrinterName: string; paymentPrinterName: string; qrPrinterName: string }>("/print/settings", {
+      const result = await apiPut<{ ok: boolean; printAgentUrl: string; printAgentEnabled: boolean; printPaperWidth: number; kitchenPrinterName: string; paymentPrinterName: string; qrPrinterName: string; dailyReportEnabled: boolean; dailyReportTime: string }>("/print/settings", {
         printAgentUrl: (s.printAgentUrl || "http://localhost:9110/print").trim(),
         printAgentEnabled: !!s.printAgentEnabled,
         printPaperWidth: Number(s.printPaperWidth) || 48,
         kitchenPrinterName: s.kitchenPrinterName || "",
         paymentPrinterName: s.paymentPrinterName || "",
         qrPrinterName: s.qrPrinterName || "",
+        dailyReportEnabled: s.dailyReportEnabled !== false,
+        dailyReportTime: s.dailyReportTime || "23:30",
       });
       setS((prev) => prev ? { ...prev, ...result } : prev);
       await fetchSettings(true);
@@ -331,6 +335,17 @@ export default function SettingsPage() {
           <div><label className="lbl">Kitchen printer — KOT tickets</label><select className="inp w-full" value={s.kitchenPrinterName || ""} onChange={(e) => set("kitchenPrinterName", e.target.value)}><option value="">Select kitchen printer</option>{printerNames.map((n) => <option key={n} value={n}>{n}</option>)}{s.kitchenPrinterName && !printerNames.includes(s.kitchenPrinterName) && <option value={s.kitchenPrinterName}>{s.kitchenPrinterName} (saved)</option>}</select><button className="btn btn-ghost btn-sm mt-2" onClick={() => testPrinter("kitchen")}><Printer size={13} /> Test kitchen printer</button></div>
           <div><label className="lbl">Payment printer — bills &amp; receipts</label><select className="inp w-full" value={s.paymentPrinterName || ""} onChange={(e) => set("paymentPrinterName", e.target.value)}><option value="">Select payment printer</option>{printerNames.map((n) => <option key={n} value={n}>{n}</option>)}{s.paymentPrinterName && !printerNames.includes(s.paymentPrinterName) && <option value={s.paymentPrinterName}>{s.paymentPrinterName} (saved)</option>}</select><button className="btn btn-ghost btn-sm mt-2" onClick={() => testPrinter("payment")}><Printer size={13} /> Test payment printer</button></div>
           <div><label className="lbl">Table QR printer — QR cards for tables</label><select className="inp w-full" value={s.qrPrinterName || ""} onChange={(e) => set("qrPrinterName", e.target.value)}><option value="">Not set — use the browser print window</option>{printerNames.map((n) => <option key={n} value={n}>{n}</option>)}{s.qrPrinterName && !printerNames.includes(s.qrPrinterName) && <option value={s.qrPrinterName}>{s.qrPrinterName} (saved)</option>}</select><button className="btn btn-ghost btn-sm mt-2" onClick={testQrPrinter}><Printer size={13} /> Test QR printer</button></div>
+        </div>
+        <div className="mt-4 rounded-xl p-3" style={{ background: "var(--panel-2)", border: "1px solid var(--line-soft)" }}>
+          <label className="flex items-center gap-2.5 cursor-pointer">
+            <input type="checkbox" checked={s.dailyReportEnabled !== false} onChange={(e) => set("dailyReportEnabled", e.target.checked)} />
+            <span className="text-[13px] text-ink font-semibold">Print daily card &amp; cash bills automatically</span>
+          </label>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="text-[12px] text-muted">Every day at</span>
+            <input type="time" className="inp" style={{ width: 130 }} value={s.dailyReportTime || "23:30"} onChange={(e) => set("dailyReportTime", e.target.value)} disabled={s.dailyReportEnabled === false} />
+          </div>
+          <p className="text-[11px] text-muted mt-2">Two slips on the payment printer: card bills and cash bills (order number, time, table, amount and total). Print any day by hand from Reports &rarr; Daily card &amp; cash bills. The POS computer must be on at that time.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 mt-4">
           <button className="btn btn-ghost btn-sm" onClick={refreshPrinters} disabled={printerLoading}><RefreshCw size={13} className={printerLoading ? "animate-spin" : ""} /> {printerLoading ? "Searching…" : "Refresh printer list"}</button>

@@ -361,6 +361,8 @@ function settingsRow(r) {
     kitchenPrinterName: r.kitchenPrinterName || '',
     paymentPrinterName: r.paymentPrinterName || '',
     qrPrinterName: r.qrPrinterName || '',
+    dailyReportEnabled: r.dailyReportEnabled == null ? true : !!r.dailyReportEnabled,
+    dailyReportTime: r.dailyReportTime || '23:30',
     publicBaseUrl: r.publicBaseUrl || '',
     qrOrderAutoKitchen: r.qrOrderAutoKitchen == null ? true : !!r.qrOrderAutoKitchen,
     defaultOrderType: r.defaultOrderType || 'dine-in',

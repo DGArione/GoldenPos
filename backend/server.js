@@ -142,6 +142,8 @@ app.use((req, res) => {
 
 // ── Background scheduler (auto month-end stock close) ────────
 try { require('./src/scheduler').start(); } catch (e) { console.warn('[scheduler] not started:', e.message); }
+// ── Daily card & cash bill report (auto-print at the time set in Settings) ──
+try { require('./src/daily-bills').start(); } catch (e) { console.warn('[daily-bills] not started:', e.message); }
 // ── Automatic daily database backups ─────────────────────────
 try { require('./src/backup').start(); } catch (e) { console.warn('[backup] not started:', e.message); }
 
