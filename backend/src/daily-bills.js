@@ -43,6 +43,10 @@ function collect(date, branchId) {
     const payments = jsonDecode(o.payments, []) || [];
     const num = o.displayNum || ('#' + String(o.id).padStart(4, '0'));
     const table = o.orderType === 'dine-in' && o.tableName ? String(o.tableName) : '';
+    // Service charge belonging to each payment, in proportion to how much of the bill it paid
+    // (so split card/cash bills add up exactly to the bill's service charge).
+    const billTotal = Number(o.total || 0) + Number(o.tipAmount || 0);
+    const billSc = Number(o.serviceCharge || 0);
     for (const p of payments) {
       const method = String(p.method || '').toLowerCase();
       if (method !== 'cash' && method !== 'card') continue;
@@ -50,14 +54,15 @@ function collect(date, branchId) {
       if (!when || ymd(when) !== date) continue;
       const amount = Math.round(Number(p.amount || 0) * 100) / 100;
       if (!amount) continue;
-      const line = { orderId: Number(o.id), orderNum: num, time: hm(when), table, amount, refund: amount < 0 || p.type === 'refund', at: when.getTime() };
+      const sc = billTotal > 0 ? Math.round(billSc * (amount / billTotal) * 100) / 100 : 0;
+      const line = { orderId: Number(o.id), orderNum: num, time: hm(when), table, amount, serviceCharge: sc, refund: amount < 0 || p.type === 'refund', at: when.getTime() };
       (method === 'card' ? card : cash).push(line);
     }
   }
   const sort = (a, b) => a.at - b.at;
   card.sort(sort); cash.sort(sort);
-  const total = (l) => Math.round(l.reduce((s, x) => s + x.amount, 0) * 100) / 100;
-  return { date, card, cash, cardTotal: total(card), cashTotal: total(cash) };
+  const total = (l, k = 'amount') => Math.round(l.reduce((s, x) => s + x[k], 0) * 100) / 100;
+  return { date, card, cash, cardTotal: total(card), cashTotal: total(cash), cardServiceCharge: total(card, 'serviceCharge'), cashServiceCharge: total(cash, 'serviceCharge') };
 }
 
 function money(v, cur) {
@@ -71,24 +76,28 @@ function slipText(rep, kind, s, width) {
   const cur = s.currencySymbol || 'Rs. ';
   const lines = kind === 'card' ? rep.card : rep.cash;
   const total = kind === 'card' ? rep.cardTotal : rep.cashTotal;
+  const scTotal = kind === 'card' ? rep.cardServiceCharge : rep.cashServiceCharge;
   const center = (t) => { t = String(t).slice(0, w); const p = Math.floor((w - t.length) / 2); return ' '.repeat(Math.max(0, p)) + t; };
   const row = (a, b) => { a = String(a); b = String(b); if (a.length + b.length + 1 > w) a = a.slice(0, w - b.length - 1); return a + ' '.repeat(Math.max(1, w - a.length - b.length)) + b; };
-  // Columns: order no | time | table | amount (right)
-  const amtW = Math.max(12, Math.floor(w * 0.3));
-  const numW = Math.floor((w - amtW) * 0.38), timeW = 6, tblW = w - amtW - numW - timeW;
-  const col = (n, t, tb, a) => (String(n).slice(0, numW - 1).padEnd(numW) + String(t).padEnd(timeW) + String(tb).slice(0, tblW - 1).padEnd(tblW)).slice(0, w - amtW) + String(a).padStart(amtW);
+  // Columns: order no | time | table | service charge (right) | amount (right)
+  const num2 = (v) => (Number(v) < 0 ? '-' : '') + Math.abs(Number(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const amtW = w >= 44 ? 12 : 10, scW = w >= 44 ? 10 : 8, timeW = 6;
+  const numW = w >= 44 ? 9 : 7, tblW = Math.max(4, w - amtW - scW - timeW - numW);
+  const col = (n, t, tb, sc, a) => String(n).slice(0, numW - 1).padEnd(numW) + String(t).padEnd(timeW) + String(tb).slice(0, tblW - 1).padEnd(tblW) + String(sc).padStart(scW) + String(a).padStart(amtW);
   const out = [];
   out.push(center((s.businessName || 'Restaurant').toUpperCase()));
   out.push(center(kind === 'card' ? 'DAILY CARD BILLS' : 'DAILY CASH BILLS'));
   out.push('='.repeat(w));
   out.push(row('Date: ' + rep.date, 'Printed: ' + hm(new Date())));
   out.push('-'.repeat(w));
-  out.push(col('Order', 'Time', 'Table', 'Amount'));
+  out.push(col('Order', 'Time', 'Table', 'Serv.Chg', 'Amount'));
   out.push('-'.repeat(w));
   if (!lines.length) out.push(center('No ' + kind + ' bills'));
-  for (const l of lines) out.push(col(l.orderNum, l.time, l.table || '-', money(l.amount, cur) + (l.refund ? ' R' : '')));
+  for (const l of lines) out.push(col(l.orderNum, l.time, l.table || '-', num2(l.serviceCharge), num2(l.amount) + (l.refund ? 'R' : '')));
   out.push('-'.repeat(w));
-  out.push(row('Bills: ' + lines.length, 'TOTAL ' + money(total, cur)));
+  out.push('Bills: ' + lines.length);
+  out.push(row('Service charge total', money(scTotal, cur)));
+  out.push(row('TOTAL', money(total, cur)));
   out.push('='.repeat(w));
   out.push('');
   return out.join('\n');

@@ -25,7 +25,8 @@ const DB_FILE = process.env.POS_DB_FILE || path.join(DATA_DIR, 'pos.db');
 const backupDir = () => SC.backupDir();
 const MIRROR_DIR = (process.env.POS_BACKUP_DIR || '').trim();
 const KEEP = parseInt(process.env.POS_BACKUP_KEEP || '30', 10);
-const EVENING = (process.env.POS_BACKUP_TIME || '23:30').split(':').map(Number);
+// Daily backup time comes from Settings > Storage & backups (default 23:59).
+const eveningTime = () => SC.backupTime().split(':').map(Number);
 
 const pad2 = (n) => String(n).padStart(2, '0');
 const today = (d = new Date()) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
@@ -65,16 +66,17 @@ function tick() {
   try {
     const now = new Date();
     const file = path.join(backupDir(), `pos-${today(now)}.db`);
+    const EVENING = eveningTime();
     const afterEvening = now.getHours() > EVENING[0] || (now.getHours() === EVENING[0] && now.getMinutes() >= (EVENING[1] || 0));
     if (!fs.existsSync(file)) backupNow();
-    else if (afterEvening && lastEvening !== today(now)) { backupNow(); lastEvening = today(now); }
+    else if (afterEvening && lastEvening !== today(now)) { backupNow(); lastEvening = today(now); console.log(`[backup] end-of-day backup done (${SC.backupTime()})`); }
   } catch (e) { console.warn('[backup] failed:', e.message); }
 }
 
 function start() {
   setTimeout(tick, 20000);                 // shortly after boot
-  setInterval(tick, 15 * 60 * 1000).unref?.();
-  console.log(`[backup] daily backups → ${backupDir()}${MIRROR_DIR ? ' (+ mirror ' + MIRROR_DIR + ')' : ''}`);
+  setInterval(tick, 30 * 1000).unref?.();   // every 30 s so a time like 23:59 is never missed
+  console.log(`[backup] daily backup at ${SC.backupTime()} → ${backupDir()}${MIRROR_DIR ? ' (+ mirror ' + MIRROR_DIR + ')' : ''}`);
 }
 
 // ── Restore ────────────────────────────────────────────────

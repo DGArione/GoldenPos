@@ -10,8 +10,8 @@ import { sendToConfiguredPrinter } from "@/lib/printing";
 import { printHtmlSilently } from "@/lib/receipt";
 import { Modal, useToast } from "@/components/ui";
 
-interface Line { orderNum: string; time: string; table: string; amount: number; refund?: boolean }
-interface DailyBills { date: string; card: Line[]; cash: Line[]; cardTotal: number; cashTotal: number; cardText: string; cashText: string }
+interface Line { orderNum: string; time: string; table: string; amount: number; serviceCharge?: number; refund?: boolean }
+interface DailyBills { date: string; card: Line[]; cash: Line[]; cardTotal: number; cashTotal: number; cardServiceCharge?: number; cashServiceCharge?: number; cardText: string; cashText: string }
 
 const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
 const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c] as string));
@@ -63,16 +63,16 @@ export default function DailyBillsButton() {
               <div className="rounded-xl p-3" style={{ background: "var(--panel-2)", border: "1px solid var(--line-soft)" }}>
                 <div className="flex items-center gap-2 text-[12px] text-muted"><CreditCard size={14} /> Card bills</div>
                 <div className="mono text-[18px] font-bold mt-1 text-ink">{money(data.cardTotal, currency)}</div>
-                <div className="text-[11px] text-muted">{data.card.length} bill{data.card.length === 1 ? "" : "s"}</div>
+                <div className="text-[11px] text-muted">{data.card.length} bill{data.card.length === 1 ? "" : "s"} · service charge {money(data.cardServiceCharge || 0, currency)}</div>
               </div>
               <div className="rounded-xl p-3" style={{ background: "var(--panel-2)", border: "1px solid var(--line-soft)" }}>
                 <div className="flex items-center gap-2 text-[12px] text-muted"><Banknote size={14} /> Cash bills</div>
                 <div className="mono text-[18px] font-bold mt-1 text-ink">{money(data.cashTotal, currency)}</div>
-                <div className="text-[11px] text-muted">{data.cash.length} bill{data.cash.length === 1 ? "" : "s"}</div>
+                <div className="text-[11px] text-muted">{data.cash.length} bill{data.cash.length === 1 ? "" : "s"} · service charge {money(data.cashServiceCharge || 0, currency)}</div>
               </div>
             </div>
           )}
-          <p className="text-[11px] text-muted mt-3">Prints two slips on the bill printer: card bills and cash bills, each with order number, time, table and amount, and the total.</p>
+          <p className="text-[11px] text-muted mt-3">Prints two slips on the bill printer: card bills and cash bills, each with order number, time, table, service charge and amount, plus the service charge total and the grand total.</p>
           <div className="grid grid-cols-2 gap-2 mt-4">
             <button className="btn btn-ghost" onClick={() => setOpen(false)}>Close</button>
             <button className="btn btn-primary" disabled={!data || busy} onClick={print}><Printer size={14} /> {busy ? "Printing…" : "Print both"}</button>

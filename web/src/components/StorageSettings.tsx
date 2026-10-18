@@ -12,6 +12,7 @@ interface StorageInfo {
   dbFile: string; dbBytes: number; dataBytes: number; backupBytes: number; backupCount: number;
   dataDrive: Drive; backupDrive: Drive; pendingMove: string | null;
   lastMove: { at: string; ok: boolean; from: string; to: string; error?: string } | null;
+  backupTime?: string;
 }
 interface Check { ok: boolean; usable: boolean; path: string; problem: string; exists: boolean; freeBytes: number; totalBytes: number; root: string; requiredBytes: number }
 
@@ -59,9 +60,10 @@ export default function StorageSettings() {
   const [dataCheck, setDataCheck] = useState<Check | null>(null);
   const [bkCheck, setBkCheck] = useState<Check | null>(null);
   const [busy, setBusy] = useState("");
+  const [bkTime, setBkTime] = useState("");
 
   async function load() {
-    try { setInfo(await apiGet<StorageInfo>("/admin/storage")); setErr(""); }
+    try { const i = await apiGet<StorageInfo>("/admin/storage"); setInfo(i); setBkTime(i.backupTime || "23:59"); setErr(""); }
     catch (e) { setErr(e instanceof Error ? e.message : "Could not load storage details"); }
   }
   useEffect(() => { load(); }, []);
@@ -100,6 +102,13 @@ export default function StorageSettings() {
       toast.push("ok", `Backups now saved in ${r.backupDir} (${r.copied} existing copied, test backup made)`);
       setBkPath(""); setBkCheck(null); load();
     } catch (e) { toast.push("bad", e instanceof Error ? e.message : "Could not change the backup folder"); }
+    finally { setBusy(""); }
+  }
+
+  async function saveBackupTime() {
+    setBusy("time");
+    try { const r = await apiPost<{ backupTime: string }>("/admin/storage/backup-time", { time: bkTime }); toast.push("ok", `Daily backup time set to ${r.backupTime}`); load(); }
+    catch (e) { toast.push("bad", e instanceof Error ? e.message : "Could not save the backup time"); }
     finally { setBusy(""); }
   }
 
@@ -143,7 +152,13 @@ export default function StorageSettings() {
           <div className="rounded-xl p-3" style={{ background: "var(--panel-2)", border: "1px solid var(--line-soft)" }}>
             <div className="flex items-center gap-2 text-[13px] font-semibold text-ink"><Archive size={14} /> Backup folder</div>
             <div className="mt-1 text-[12px] text-muted">Now: <code className="font-mono text-ink">{info.backupDir}</code></div>
-            <div className="text-[12px] text-muted">{info.backupCount} backup file(s) · {fmtBytes(info.backupBytes)} · a backup is made automatically every day</div>
+            <div className="text-[12px] text-muted">{info.backupCount} backup file(s) · {fmtBytes(info.backupBytes)} · automatic backup every day at <b>{info.backupTime || "23:59"}</b></div>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className="text-[12px] text-muted">Daily backup time</span>
+              <input type="time" className="inp" style={{ width: 130 }} value={bkTime} onChange={(e) => setBkTime(e.target.value)} />
+              <button className="btn btn-ghost btn-sm" disabled={!bkTime || bkTime === (info.backupTime || "23:59") || !!busy} onClick={saveBackupTime}>{busy === "time" ? "Saving…" : "Save time"}</button>
+              <span className="text-[11px] text-muted">The POS computer must be on at this time. Also backs up when the POS starts if today has no backup yet.</span>
+            </div>
             <SpaceBar d={info.backupDrive} />
             <label className="lbl mt-3">Save backups in this folder</label>
             <input className="inp w-full font-mono" placeholder="E:\GoldenPOS-Backups" value={bkPath} onChange={(e) => { setBkPath(e.target.value); setBkCheck(null); }} />

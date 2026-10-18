@@ -150,11 +150,19 @@ function applyPendingMove() {
   }
 }
 
+/** Daily backup time 'HH:MM' (Settings > Storage & backups). Default 23:59. */
+function backupTime() {
+  const c = readCfg();
+  const t = String(c.backupTime || process.env.POS_BACKUP_TIME || '23:59').trim();
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(t) ? t : '23:59';
+}
+function setBackupTime(t) { const c = readCfg(); c.backupTime = t; writeCfg(c); }
+
 function setBackupDir(dir) { const c = readCfg(); if (dir) c.backupDir = dir; else delete c.backupDir; writeCfg(c); }
 function requestDataMove(dir) { const c = readCfg(); c.pendingDataDir = dir; writeCfg(c); }
 function cancelDataMove() { const c = readCfg(); delete c.pendingDataDir; writeCfg(c); }
 
 module.exports = {
   CFG_FILE, dataDir, backupDir, defaultDataDir, defaultBackupDir, envLocked, pendingMove, lastMoveResult,
-  checkFolder, dirSize, applyPendingMove, setBackupDir, requestDataMove, cancelDataMove,
+  checkFolder, dirSize, applyPendingMove, setBackupDir, requestDataMove, cancelDataMove, backupTime, setBackupTime,
 };

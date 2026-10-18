@@ -3622,8 +3622,17 @@ function handle(ctx) {
       dataBytes: SC.dirSize(dd), backupBytes: SC.dirSize(bd), backupCount: count,
       dataDrive: { root: dc.root, freeBytes: dc.freeBytes, totalBytes: dc.totalBytes, writable: dc.ok },
       backupDrive: { root: bc.root, freeBytes: bc.freeBytes, totalBytes: bc.totalBytes, writable: bc.ok },
-      pendingMove: SC.pendingMove(), lastMove: SC.lastMoveResult(),
+      pendingMove: SC.pendingMove(), lastMove: SC.lastMoveResult(), backupTime: SC.backupTime(),
     });
+  }
+  // Daily automatic backup time (HH:MM, 24-hour).
+  if (method === 'POST' && uri === '/admin/storage/backup-time') {
+    requireRole(['admin'], user);
+    const t = String(body.time || '').trim();
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(t)) err('Backup time must be HH:MM (24-hour), e.g. 23:59', 400);
+    require('./storage-config').setBackupTime(t);
+    console.log(`[storage] ${user.name} set the daily backup time to ${t}`);
+    jsonOut({ ok: true, backupTime: t });
   }
   // Is this folder usable, and is there enough room on its drive?
   if (method === 'POST' && uri === '/admin/storage/check') {
