@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Floor — Restaurant POS</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="page-body narrow">
+    <div class="page-header">
+      <div>
+        <h2>Floor Plan</h2>
+        <div class="subtitle">Tap an open table to start an order there.</div>
+      </div>
+      <div style="display:flex; gap:14px; font-size:12px; color:var(--muted); align-items:center;">
+        <span><span class="badge badge-open">open</span></span>
+        <span><span class="badge badge-ordered">ordered</span></span>
+        <span><span class="badge badge-ready">ready</span></span>
+        <span><span class="badge badge-dirty">dirty</span></span>
+        <button id="resetFloorBtn" class="btn btn-danger" style="font-size:12px; padding:6px 12px; display:none;" title="Mark every table open again">Reset floor</button>
+        <button onclick="spaRefreshPage()" class="btn" style="font-size:12px; padding:6px 12px;" title="Refresh">↻ Refresh</button>
+      </div>
+    </div>
+
+    <div id="tableGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px;"></div>
+
+    <div id="addTableForm" style="display:none; margin-top:24px; gap:8px;">
+      <input id="newTableName" placeholder="Table name" style="flex:1;" />
+      <input id="newTableFloor" placeholder="Floor / area (e.g. Ground, 1st)" style="width:200px;" />
+      <input id="newTableSeats" placeholder="Seats" type="number" style="width:90px;" />
+      <button id="addTableBtn" class="btn btn-primary">+ Add Table</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="nav.js"></script>
+  <script src="printing.js"></script>
+  <script src="qrcode.js"></script>
+  <script src="qr.js"></script>
+  <script src="floor.js"></script>
+</body>
+</html>

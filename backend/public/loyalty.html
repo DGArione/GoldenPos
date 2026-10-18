@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Loyalty — Restaurant POS</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="navbar"></div>
+  <div class="page-body">
+    <div class="page-header">
+      <div>
+        <h2>Loyalty</h2>
+      </div>
+    </div>
+
+    <!-- Stat tiles -->
+    <div class="stat-row">
+      <div class="stat"><div class="stat-label">Points issued</div><div class="stat-value" id="lyIssued">—</div></div>
+      <div class="stat neg"><div class="stat-label">Points redeemed</div><div class="stat-value" id="lyRedeemed">—</div></div>
+      <div class="stat muted"><div class="stat-label">Outstanding</div><div class="stat-value" id="lyOutstanding">—</div></div>
+      <div class="stat muted"><div class="stat-label">Members</div><div class="stat-value" id="lyMembers">—</div></div>
+    </div>
+
+    <!-- Rules / settings -->
+    <div class="card" id="lyRulesCard" style="padding:18px 20px; margin-bottom:22px;">
+      <div style="font-size:13px; font-weight:700; margin-bottom:4px;">Earning & redemption rules</div>
+      <div id="lyRulesPlain" style="font-size:13px; color:var(--muted); margin-bottom:14px;"></div>
+      <div id="lyRulesForm" style="display:none; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px;">
+        <div class="f"><label>Points earned</label><input id="ly_earnPoints" type="number" step="0.1" min="0"/></div>
+        <div class="f"><label>Per amount spent</label><input id="ly_earnPer" type="number" step="1" min="1"/></div>
+        <div class="f"><label>Value of 1 point</label><input id="ly_redeemValue" type="number" step="0.01" min="0"/></div>
+        <div class="f"><label>Min points to redeem</label><input id="ly_minRedeem" type="number" step="1" min="0"/></div>
+      </div>
+      <div id="lyRulesActions" style="margin-top:12px; display:none; gap:8px;"></div>
+    </div>
+
+    <!-- Top customers -->
+    <div class="card" style="padding:0; overflow:hidden; margin-bottom:22px;">
+      <div style="padding:14px 18px; font-size:13px; font-weight:700; border-bottom:1px solid var(--border);">Top members</div>
+      <div id="lyTop"></div>
+    </div>
+
+    <!-- Recent activity -->
+    <div class="card" style="padding:0; overflow:hidden;">
+      <div style="padding:14px 18px; font-size:13px; font-weight:700; border-bottom:1px solid var(--border);">Recent activity</div>
+      <div id="lyActivity"></div>
+    </div>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="nav.js"></script>
+  <script src="loyalty.js"></script>
+</body>
+</html>

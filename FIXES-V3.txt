@@ -1,0 +1,16 @@
+Golden POS V3 — targeted fixes
+
+1. Menu loading: Admin and Super Manager accounts with no assigned branch now default to the first active branch. Regular staff remain restricted to their assigned branch. Smoke-tested against a fresh seeded database: branch 1 resolves and 142 menu items are present.
+2. Online Orders: separate Online Orders and Table Orders tabs. Newly submitted orders remain in the relevant approval tab until accepted/rejected.
+3. Approval history: accepted and rejected web/table orders move to History. Accepted orders are no longer offered Accept/Reject again.
+4. Table payment: when a table has multiple unpaid dine-in tickets, the payment screen offers combined cash/card settlement for all open tickets at that table. Kitchen tickets remain separate.
+5. Existing dine-in-only service charge and order-type editing retained.
+
+Install/run:
+- Stop any running POS process first.
+- Extract this ZIP to a new folder (do not merge into the previous folder).
+- Run `npm install`, then `npm start`.
+- Open http://localhost:3000 and hard-refresh with Ctrl+Shift+R.
+- The database remains at backend/data/pos.db. Keep that file to preserve existing restaurant data. Do not delete it unless you intentionally want a fresh demo database.
+
+Validation performed: backend JavaScript syntax checks passed; branch fallback was smoke-tested against the seeded SQLite database (142 menu items). A full browser-driven end-to-end test was not available in this environment.

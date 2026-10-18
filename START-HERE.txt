@@ -1,0 +1,51 @@
+GOLDEN POS - START HERE
+=======================
+
+TO OPEN THE POS
+  Double-click  "Golden POS"  on the desktop  (or  OPEN-POS.cmd  in this folder).
+  If the POS is not running it starts it for you - just wait for the
+  "Opening Golden POS..." window. The very first time it also sets itself
+  up (needs internet, about 10 minutes, only once).
+
+INSTALL ON THE POS TERMINAL (once)
+  1. Install Node.js 22 LTS from nodejs.org and Google Chrome.
+  2. Install both receipt printers in Windows. Plug the cash drawer
+     cable into the BILL printer.
+  3. Double-click  INSTALL-POS.cmd  and click "Yes" when Windows asks.
+     Wait until it says DONE.
+  4. The POS opens full-screen. Log in as Admin, go to
+     Settings > Printer management: tick "Enable direct thermal printing",
+     choose the kitchen and payment printer, Save, then Test both.
+  5. Restart the computer once to check it all comes back by itself.
+
+EVERY DAY
+  Nothing to do. Turn the computer on - the POS starts by itself.
+  Closed it by mistake? Double-click "Golden POS" on the desktop.
+  Bills print and the cash drawer opens automatically.
+
+TABLE QR ORDERING (once)
+  1. In the Wi-Fi router, reserve this computer's IP address (see
+     HOSTING-LOCAL-WINDOWS.md > Table QR ordering) so it never changes.
+  2. Settings > Online ordering & QR: press "Use this computer's address",
+     enter the Wi-Fi name + password, Save.
+  3. Floor > Print all table QR cards. Put one on each table.
+  Orders from tables pop up on the cashier screen: Online Orders >
+  Table Orders > Accept & send to kitchen.
+  Customers on MOBILE DATA too: double-click SETUP-ONLINE-ORDERING.cmd,
+  then paste the https address it gives into the QR code address.
+
+IF SOMETHING IS WRONG
+  Double-click "Golden POS Control" on the desktop:
+    1 = check it's running      2 = restart it
+    5 = backup now              8 = leave full-screen
+
+WHERE THINGS ARE (C:\GoldenPOS)
+  backend\data\pos.db       all your sales, menu and staff
+  backend\data\backups\     a copy of the database every day (30 days)
+  backend\data\print-log\   every bill and kitchen ticket, by date
+
+UPDATE TO A NEW VERSION
+  Unzip the new version anywhere and double-click its INSTALL-POS.cmd.
+  Your data is kept.
+
+More detail: HOSTING-LOCAL-WINDOWS.md

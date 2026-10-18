@@ -1,0 +1,49 @@
+GOLDEN POS V19 - ALWAYS-ON LOCAL HOSTING + FULL PRINT AUTOMATION
+=================================================================
+
+See HOSTING-LOCAL-WINDOWS.md for the install steps.
+
+PRINTING / DRAWER
+- Bills no longer open a pop-up window first. With the print agent configured
+  the bill goes straight to the payment printer: no window, no dialog, no
+  "Save as PDF" prompt, no alert() boxes.
+- Cash payments: the drawer kick is embedded in the SAME print job as the bill
+  (opens instantly while the bill prints). Separate /drawer kick is only used
+  as a fallback.
+- Payment screen no longer waits for the printer - the cashier returns to the
+  queue immediately; print/drawer problems show as a toast.
+- Browser fallback now prints through a hidden iframe (silent in kiosk mode).
+- All agent calls have timeouts (8 s print / 5 s drawer) so a dead printer can
+  never freeze the till.
+- Waiter tablets on the LAN can print KOTs: /print-agent/* on the till's web
+  server proxies to the local agent.
+
+PRINT AGENT (backend/print-agent/agent.js)
+- One persistent PowerShell spooler worker (C# compiled once) instead of a new
+  PowerShell + C# compile per ticket: ~1.5-3 s -> ~0.1 s per print.
+- Per-printer queue: KOT and bill jobs never collide.
+- Automatic bill/KOT log: backend/data/print-log/YYYY-MM/YYYY-MM-DD-*.log
+  (logged even if the printer is offline).
+- GET /health; CORS limited to localhost + private LAN origins.
+
+HOSTING
+- npm start now runs the production build (next start). It rebuilds only when
+  the UI source changes. npm run start:dev keeps the old dev mode.
+- start.js is now a supervisor: restarts any crashed service with back-off,
+  writes logs/*.log (rotated at 10 MB), no npm/shell wrappers (clean shutdown).
+- Backend: /healthz, WAL checkpoint on shutdown, busy_timeout, FULL sync.
+- Daily automatic DB backups (backend/src/backup.js) with 30-day retention and
+  optional mirror folder (POS_BACKUP_DIR). npm run backup = backup now.
+- deploy/windows/: install.ps1 (boot task, kiosk, firewall, power settings),
+  kiosk.ps1, pos-control.cmd, exit-kiosk.cmd, uninstall.ps1.
+
+FILES CHANGED
+  start.js, package.json, backend/server.js, backend/src/db.js,
+  backend/print-agent/agent.js, web/next.config.mjs, web/src/lib/printing.ts,
+  web/src/lib/receipt.ts, web/src/app/(app)/payment/page.tsx
+FILES ADDED
+  backend/src/backup.js, deploy/windows/*, HOSTING-LOCAL-WINDOWS.md, V19-CHANGES.txt
+
+NOT CHANGED
+- The classic HTML UI (npm run start:classic) keeps its old printing path.
+- Database schema: unchanged. Existing pos.db works as-is.

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Settings — Restaurant POS</title>
+<link rel="stylesheet" href="style.css" />
+<style>
+  /* ---- Theme picker grid ---- */
+  .theme-grid { display:block; margin-top:14px; }
+  .theme-grid-inner { display:grid; grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); gap:8px; }
+  .theme-card {
+    border:2px solid var(--border); border-radius:10px; padding:12px 10px 10px;
+    cursor:pointer; text-align:center; transition:all 0.15s ease; background:var(--panel);
+  }
+  .theme-card:hover { border-color:var(--accent); transform:translateY(-1px); box-shadow:var(--shadow-sm); }
+  .theme-card.active { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+  .theme-swatches { display:flex; gap:4px; justify-content:center; margin-bottom:8px; }
+  .theme-swatch { width:22px; height:22px; border-radius:50%; border:1px solid rgba(0,0,0,0.08); }
+  .theme-label { font-size:11px; font-weight:600; color:var(--text); }
+</style>
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="page-body narrow" style="padding-top:0;">
+    <div style="padding:22px 0 12px;">
+      <h2 style="margin:0 0 2px;">Settings</h2>
+      <div class="subtitle">Configure this installation of Restaurant POS.</div>
+    </div>
+
+        <!-- ===== BUSINESS INFO ===== -->
+        <div class="settings-panel" data-panel="bizinfo">
+          <h3 style="margin-top:0;">Business Information</h3>
+          <div class="settings-row"><label>Business name</label><input id="setBusinessName" placeholder="e.g. Spice Garden Restaurant"/></div>
+          <div class="settings-row"><label>Tagline</label><input id="setTagline" placeholder="e.g. Authentic Sri Lankan Cuisine"/></div>
+          <div class="settings-row"><label>Phone number</label><input id="setBusinessPhone" placeholder="e.g. +94 11 234 5678"/></div>
+          <div class="settings-row"><label>Address</label><input id="setBusinessAddress" placeholder="e.g. 123 Galle Road, Colombo 03"/></div>
+          <div class="settings-row"><label>Email</label><input id="setBusinessEmail" placeholder="e.g. info@restaurant.lk"/></div>
+          <div class="settings-row"><label>Logo URL</label><input id="setLogoUrl" placeholder="https://... (shown in nav + receipts)"/></div>
+          <button id="saveBusinessBtn" class="btn btn-primary" style="margin-top:6px;">Save Business Info</button>
+        </div>
+
+        <!-- ===== RATES & CURRENCY ===== -->
+        <div class="settings-panel" data-panel="rates" style="display:none;">
+          <h3 style="margin-top:0;">Rates &amp; Currency</h3>
+          <div class="settings-row"><label>Service charge %</label><input id="setServiceCharge" type="number" step="0.1" min="0" max="100"/></div>
+          <div class="settings-row"><label>VAT %</label><input id="setVat" type="number" step="0.1" min="0" max="100"/></div>
+          <div class="settings-row">
+            <label>Card fee %<br/><span style="font-size:11px; color:var(--muted); font-weight:400;">Cut the bank takes on card payments. Reports show card revenue net of this.</span></label>
+            <input id="setCardFee" type="number" step="0.01" min="0" max="100"/>
+          </div>
+          <div class="settings-row"><label>Currency symbol</label><input id="setCurrency" placeholder="Rs."/></div>
+          <div class="settings-row"><label>Default order type<br/><span style="font-size:11px; color:var(--muted); font-weight:400;">What Order Entry starts on for a walk-in (no table).</span></label>
+            <select id="setDefaultOrderType">
+              <option value="dine-in">Dine-in</option>
+              <option value="takeaway">Take Away</option>
+              <option value="delivery">Delivery</option>
+            </select>
+          </div>
+          <div class="settings-row"><label>Date format</label>
+            <select id="setDateFormat">
+              <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+              <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+              <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+            </select>
+          </div>
+          <p style="font-size:12px; color:var(--muted);">These apply immediately to every new order — no restart required.</p>
+          <button id="saveRegionalBtn" class="btn btn-primary">Save Rates &amp; Currency</button>
+        </div>
+
+        <!-- ===== RECEIPT ===== -->
+        <div class="settings-panel" data-panel="receipt" style="display:none;">
+          <h3 style="margin-top:0;">Receipt Customization</h3>
+          <div class="settings-row"><label>Footer text</label><input id="setReceiptFooter" placeholder="Thank you!"/></div>
+          <div class="settings-row"><label>VAT breakdown on receipt</label>
+            <label class="switch"><input type="checkbox" id="setReceiptVatBreakdown"/><span>Show service charge + VAT lines (vs a single total line)</span></label>
+          </div>
+          <button id="saveReceiptBtn" class="btn btn-primary">Save Receipt Settings</button>
+        </div>
+
+        <!-- ===== LOGIN PAGE ===== -->
+        <div class="settings-panel" data-panel="loginpage" style="display:none;">
+          <h3 style="margin-top:0;">Login Page Style</h3>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:18px;">Choose how the login screen looks for all staff. Tap a style to select it, then Save.</p>
+
+          <div id="loginLayoutPicker" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; margin-bottom:20px;"></div>
+
+          <div style="margin-bottom:18px; max-width:340px;">
+            <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">🎨 Login page theme</label>
+            <select id="setLoginTheme" style="width:100%;"></select>
+            <div style="font-size:11px; color:var(--muted); margin-top:4px;">Give the login screen its own colours. “Match app theme” follows whatever theme the app is set to.</div>
+          </div>
+
+          <div id="loginBgUrlRow" style="display:none; margin-bottom:18px;">
+            <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">📷 Background Image URL</label>
+            <input id="setLoginBgUrl" placeholder="https://example.com/restaurant-photo.jpg" style="width:100%;"/>
+            <div style="font-size:11px; color:var(--muted); margin-top:4px;">Paste a direct link to a photo (your restaurant interior, food, or any scenic image). The image will fill the screen behind the frosted glass card.</div>
+          </div>
+
+          <button id="saveLoginPageBtn" class="btn btn-primary">Save Login Style</button>
+        </div>
+
+        <!-- ===== THEMES ===== -->
+        <div class="settings-panel" data-panel="themes" style="display:none;">
+          <h3 style="margin-top:0;">Colour Themes</h3>
+          <p style="font-size:13px; color:var(--muted); margin-bottom:0;">Choose a colour theme for the entire system. The selected theme applies to all pages for all users instantly.</p>
+          <div class="theme-grid" id="themeGrid"></div>
+          <p style="font-size:11px; color:var(--muted); margin-top:16px;">Each theme works in both Light and Dark mode. Use the dark/light toggle in the sidebar footer to switch modes.</p>
+        </div>
+
+        <!-- ===== APPEARANCE ===== -->
+        <div class="settings-panel" data-panel="appearance" style="display:none;">
+          <h3 style="margin-top:0;">Appearance</h3>
+          <div class="settings-row"><label>Default mode for staff</label>
+            <select id="setTheme"><option value="light">Light mode</option><option value="dark">Dark mode</option></select>
+          </div>
+          <div class="settings-row"><label>Allow staff to toggle mode</label>
+            <label class="switch"><input type="checkbox" id="setAllowOverride"/><span>Each staff member can switch between light and dark mode using the button in the sidebar</span></label>
+          </div>
+          <div class="settings-row"><label>Font</label><input id="setFont" placeholder="Inter"/></div>
+          <button id="saveAppearanceBtn" class="btn btn-primary">Save Appearance</button>
+        </div>
+
+        <!-- ===== NOTIFICATIONS ===== -->
+        <div class="settings-panel" data-panel="notifications" style="display:none;">
+          <h3 style="margin-top:0;">Notification Settings</h3>
+          <div class="settings-row"><label>Default low-stock threshold</label><input id="setLowStockThreshold" type="number" min="0" step="1"/></div>
+          <div class="settings-row"><label>Email notifications</label><label class="switch"><input type="checkbox" id="setEmailEnabled" disabled/><span>Coming soon</span></label></div>
+          <div class="settings-row"><label>SMS notifications</label><label class="switch"><input type="checkbox" id="setSmsEnabled" disabled/><span>Coming soon</span></label></div>
+          <button id="saveNotificationsBtn" class="btn btn-primary">Save Notifications</button>
+        </div>
+
+        <!-- ===== USER OVERSIGHT ===== -->
+        <div class="settings-panel" data-panel="users" style="display:none; padding:0;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+            <div>
+              <h3 style="margin:0 0 4px;">User Oversight</h3>
+              <p style="font-size:12px; color:var(--muted); margin:0;">View all users across branches. Reset PIN or Password for any user.</p>
+            </div>
+            <button id="addUserBtn" class="btn btn-primary" style="font-size:13px;">+ Add User</button>
+          </div>
+          <div id="userRows"></div>
+        </div>
+
+        <!-- Add User Modal -->
+        <div id="addUserModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,.6); align-items:center; justify-content:center;">
+          <div style="background:var(--card); border-radius:12px; padding:28px 32px; width:380px; max-width:95vw; max-height:90vh; overflow-y:auto;">
+            <h3 style="margin:0 0 18px; font-size:16px;">Add New User</h3>
+            <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Name</label>
+            <input id="newUserName" type="text" placeholder="e.g. John" style="width:100%; box-sizing:border-box; padding:9px 12px; border-radius:8px; border:1px solid var(--border-soft); background:var(--input-bg,var(--bg)); color:var(--text); font-size:14px; margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Role</label>
+            <select id="newUserRole" style="width:100%; box-sizing:border-box; padding:9px 12px; border-radius:8px; border:1px solid var(--border-soft); background:var(--input-bg,var(--bg)); color:var(--text); font-size:14px; margin-bottom:12px;">
+              <option value="superManager">Super Manager</option>
+              <option value="manager">Manager</option>
+              <option value="server">Server</option>
+              <option value="cashier">Cashier</option>
+              <option value="kitchen">Kitchen</option>
+              <option value="finance">Finance</option>
+            </select>
+            <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Auth method</label>
+            <select id="newUserAuth" style="width:100%; box-sizing:border-box; padding:9px 12px; border-radius:8px; border:1px solid var(--border-soft); background:var(--input-bg,var(--bg)); color:var(--text); font-size:14px; margin-bottom:12px;">
+              <option value="pin">PIN</option>
+              <option value="password">Username &amp; Password</option>
+            </select>
+            <!-- PIN fields -->
+            <div id="newUserPinFields">
+              <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">PIN (4–8 digits)</label>
+              <input id="newUserPin" type="password" inputmode="numeric" maxlength="8" placeholder="e.g. 1234" style="width:100%; box-sizing:border-box; padding:9px 12px; border-radius:8px; border:1px solid var(--border-soft); background:var(--input-bg,var(--bg)); color:var(--text); font-size:14px; margin-bottom:12px;">
+            </div>
+            <!-- Password fields -->
+            <div id="newUserPwFields" style="display:none;">
+              <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Username</label>
+              <input id="newUserUsername" type="text" placeholder="e.g. john.doe" style="width:100%; box-sizing:border-box; padding:9px 12px; border-radius:8px; border:1px solid var(--border-soft); background:var(--input-bg,var(--bg)); color:var(--text); font-size:14px; margin-bottom:12px;">
+              <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Temporary password (min 6 chars)</label>
+              <input id="newUserTempPw" type="password" placeholder="They must change on first login" style="width:100%; box-sizing:border-box; padding:9px 12px; border-radius:8px; border:1px solid var(--border-soft); background:var(--input-bg,var(--bg)); color:var(--text); font-size:14px; margin-bottom:12px;">
+            </div>
+            <div id="addUserError" style="color:var(--danger,#e74c3c); font-size:12px; min-height:18px; margin-bottom:10px;"></div>
+            <div style="display:flex; gap:10px;">
+              <button id="addUserCancel" class="btn" style="flex:1;">Cancel</button>
+              <button id="addUserSave" class="btn btn-primary" style="flex:1;">Create User</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== LOGIN ACTIVITY ===== -->
+        <div class="settings-panel" data-panel="activity" style="display:none; padding:0;">
+          <h3 style="margin:0 0 4px;">Login Activity</h3>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:14px;">Last 100 logins across every role and branch.</p>
+          <div id="activityRows"></div>
+        </div>
+
+        <!-- ===== ADD-ONS ===== -->
+        <div class="settings-panel" data-panel="addons" style="display:none;">
+          <h3 style="margin-top:0;">Add-ons</h3>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:16px;">
+            Enable optional feature modules. When switched on, they appear for your staff under the
+            <strong>Add-ons</strong> group in the sidebar (based on their role).
+          </p>
+          <div id="addonsList" style="display:grid; gap:12px;"></div>
+        </div>
+
+        <!-- ===== FISCAL & TAX ===== -->
+        <div class="settings-panel" data-panel="fiscal" style="display:none;">
+          <h3 style="margin-top:0;">Fiscal &amp; Tax</h3>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:16px;">
+            Your tax registration number prints on every receipt. Turn on fiscal invoice numbering to
+            give each paid order a sequential invoice number, and export a fiscal journal for filing.
+          </p>
+          <div class="f"><label>Tax registration number (TRN / VAT no.)</label>
+            <input id="fiscalTrn" placeholder="e.g. 1234567890"/></div>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; margin:10px 0;">
+            <input type="checkbox" id="fiscalEnabled"/> Assign sequential fiscal invoice numbers
+          </label>
+          <div class="f"><label>Invoice number prefix</label>
+            <input id="fiscalPrefix" placeholder="INV-" style="max-width:160px;"/></div>
+          <button class="btn btn-primary" id="fiscalSaveBtn" style="margin-top:6px;">Save fiscal settings</button>
+
+          <div class="card" style="padding:16px 18px; margin-top:22px;">
+            <div style="font-weight:700; font-size:14px; margin-bottom:8px;">📑 Fiscal journal export</div>
+            <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap;">
+              <div class="f" style="margin:0;"><label>From</label><input id="fiscalFrom" type="date"/></div>
+              <div class="f" style="margin:0;"><label>To</label><input id="fiscalTo" type="date"/></div>
+              <button class="btn" id="fiscalExportBtn">⬇ Export CSV</button>
+            </div>
+            <div id="fiscalExportInfo" style="font-size:12px; color:var(--muted); margin-top:10px;"></div>
+          </div>
+        </div>
+
+        <!-- ===== QR ORDERING ===== -->
+        <div class="settings-panel" data-panel="qrorder" style="display:none;">
+          <h3 style="margin-top:0;">QR Ordering</h3>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:16px;">
+            Each table has a QR code (print it from <strong>Floor</strong>). Guests scan it to open the menu,
+            order from their phone, and the order goes to the kitchen and shows in Payment under that table.
+          </p>
+          <div class="f"><label>Public / customer URL</label>
+            <input id="qrBaseUrl" placeholder="http://192.168.1.50:3000"/>
+            <div class="f-hint">The address a guest's phone uses to reach this POS — your till's network address, or a public domain if you expose it. Leave blank to use the current address.</div>
+          </div>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; margin:10px 0;">
+            <input type="checkbox" id="qrAutoKitchen"/> Send QR orders straight to the kitchen
+          </label>
+          <div class="f-hint" style="margin:-4px 0 12px;">When off, QR orders wait in <strong>Online Orders</strong> for a staff member to accept first.</div>
+          <button class="btn btn-primary" id="qrSaveBtn">Save</button>
+        </div>
+
+        <!-- ===== PRINTING ===== -->
+        <div class="settings-panel" data-panel="printing" style="display:none;">
+          <h3 style="margin-top:0;">Printing</h3>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:16px;">
+            A <strong>print agent</strong> is a tiny helper that runs on the till computer and drives your
+            thermal printer directly — so KOTs and receipts print without the browser's print dialog (which
+            drops you out of full-screen). Leave this off to keep using browser printing. A reference agent
+            ships in the <code>print-agent/</code> folder of the app.
+          </p>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; margin:10px 0;">
+            <input type="checkbox" id="paEnabled"/> Use a thermal print agent
+          </label>
+          <div class="f"><label>Print agent URL</label>
+            <input id="paUrl" placeholder="http://localhost:9110/print"/></div>
+          <div class="f"><label>Kitchen printer (KOT tickets)</label>
+            <select id="paKitchenPrinter"><option value="">Loading printers…</option></select>
+            <div style="display:flex;gap:8px;margin-top:6px;"><button class="btn" id="paRefreshPrintersBtn" type="button">Refresh printer list</button><button class="btn" id="paTestKitchenBtn" type="button">Test kitchen printer</button></div>
+          </div>
+          <div class="f"><label>Payment printer (bills and receipts)</label>
+            <select id="paPaymentPrinter"><option value="">Loading printers…</option></select>
+            <div style="margin-top:6px;"><button class="btn" id="paTestPaymentBtn" type="button">Test payment printer</button></div>
+          </div>
+          <div class="f"><label>Table QR printer (QR cards for tables)</label>
+            <select id="paQrPrinter"><option value="">Loading printers…</option></select>
+            <div style="margin-top:6px;"><button class="btn" id="paTestQrBtn" type="button">Test QR printer</button></div>
+            <div class="f-hint" style="font-size:11px; color:var(--muted); margin-top:4px;">Used by the Print button on Floor &rarr; table QR. Leave empty to use the browser print window.</div>
+          </div>
+          <div class="f"><label>Paper width (characters per line)</label>
+            <select id="paWidth"><option value="48">80mm (48 cols)</option><option value="32">58mm (32 cols)</option></select></div>
+          <div style="display:flex; gap:8px; margin-top:6px;">
+            <button class="btn btn-primary" id="paSaveBtn">Save printer settings</button>
+          </div>
+          <div id="paTestInfo" style="font-size:12px; color:var(--muted); margin-top:10px;"></div>
+        </div>
+
+        <!-- ===== STORAGE & BACKUPS ===== -->
+        <div class="settings-panel" data-panel="storage" style="display:none;">
+          <h3 style="margin-top:0;">Storage &amp; Backups</h3>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:16px;">
+            Choose where Golden POS keeps its data (the database, bill logs) and where it saves backups.
+            Use a drive that is always connected to this computer. A USB stick that gets unplugged will stop the POS.
+          </p>
+
+          <div class="card" style="padding:16px 18px; margin-bottom:18px;">
+            <div style="font-weight:700; font-size:14px; margin-bottom:8px;">🗄️ Data folder</div>
+            <div id="stDataInfo" style="font-size:13px; line-height:1.8;">Loading…</div>
+            <div class="f" style="margin-top:12px;"><label>Move the data to this folder</label>
+              <input id="stDataPath" placeholder="D:\GoldenPOS-Data"/></div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn" id="stDataCheckBtn" type="button">Check folder &amp; free space</button>
+              <button class="btn btn-primary" id="stDataMoveBtn" type="button" disabled>Move data here…</button>
+            </div>
+            <div id="stDataResult" style="font-size:12px; margin-top:10px; line-height:1.7;"></div>
+            <div style="font-size:11px; color:var(--muted); margin-top:8px;">
+              The move happens at a restart: a safety backup is taken, the database is copied and checked, and the
+              <strong>old files are left untouched</strong> as a fallback. Everyone is signed out for about a minute, so do it when the restaurant is closed.
+            </div>
+          </div>
+
+          <div class="card" style="padding:16px 18px; margin-bottom:18px;">
+            <div style="font-weight:700; font-size:14px; margin-bottom:8px;">💾 Backup folder</div>
+            <div id="stBackupInfo" style="font-size:13px; line-height:1.8;">Loading…</div>
+            <div class="f" style="margin-top:12px;"><label>Save backups in this folder</label>
+              <input id="stBackupPath" placeholder="E:\GoldenPOS-Backups"/></div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn" id="stBackupCheckBtn" type="button">Check folder &amp; free space</button>
+              <button class="btn btn-primary" id="stBackupUseBtn" type="button" disabled>Use this folder</button>
+              <button class="btn" id="stBackupResetBtn" type="button">Back to default</button>
+            </div>
+            <div id="stBackupResult" style="font-size:12px; margin-top:10px; line-height:1.7;"></div>
+            <div style="font-size:11px; color:var(--muted); margin-top:8px;">
+              Takes effect straight away. Existing backups are copied across (the old ones are not deleted) and a test backup is made to prove the folder works.
+              Backups are made automatically every day.
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== MAINTENANCE ===== -->
+        <div class="settings-panel" data-panel="maintenance" style="display:none;">
+          <h3 style="margin-top:0;">System Maintenance</h3>
+          <div id="sysInfo" style="font-size:13px; color:var(--muted); line-height:1.9; margin-bottom:18px;"></div>
+
+          <div class="card" style="padding:16px 18px; margin-bottom:18px;">
+            <div style="font-weight:700; font-size:14px; margin-bottom:4px;">💾 Backup &amp; Restore</div>
+            <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">
+              Download a complete snapshot of your data (menu, orders, inventory, users, settings) as a JSON file you can keep safe.
+              For a full byte-for-byte backup, copy the server's <code>data/pos.db</code> file while the app is stopped — this in-app export is a quick, portable copy.
+            </p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button id="downloadBackupBtn" class="btn btn-primary">⬇️ Download Backup (JSON)</button>
+              <button id="restoreBackupBtn" class="btn">⬆️ Restore from Backup</button>
+              <button id="backupBtn" class="btn">Record Backup Time</button>
+              <input id="restoreFileInput" type="file" accept="application/json,.json" style="display:none;"/>
+            </div>
+            <div style="font-size:11px; color:var(--muted); margin-top:10px;">
+              Tip: schedule this weekly. Keep a copy off the computer (USB drive or cloud).
+              <strong>Restore</strong> replaces ALL current data with the uploaded file — use with care.
+            </div>
+          </div>
+
+          <div class="card" style="padding:16px 18px; margin-bottom:18px;">
+            <div style="font-weight:700; font-size:14px; margin-bottom:8px;">🩺 Health Check</div>
+            <div id="healthCheck" style="font-size:13px; line-height:1.8;">Running checks…</div>
+            <button id="runHealthBtn" class="btn" style="margin-top:10px; font-size:12px;">↻ Re-run checks</button>
+          </div>
+
+          <h3 style="color:var(--danger); font-size:15px;">Danger Zone</h3>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:10px;">Clears all orders, shifts, purchases, and notifications. Branches, menu, and users are kept. Useful during setup — not for production.</p>
+          <button id="resetDataBtn" class="btn btn-danger">Reset / Clear Test Data</button>
+        </div>
+
+  </div><!-- /page-body -->
+
+  <div id="toast" class="toast"></div>
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="nav.js"></script>
+  <script src="printing.js"></script>
+  <script src="qrcode.js"></script>
+  <script src="qr.js"></script>
+  <script src="settings.js"></script>
+</body>
+</html>

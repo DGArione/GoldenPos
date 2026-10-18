@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard — Restaurant POS</title>
+<link rel="stylesheet" href="style.css" />
+<style>
+/* ============================================================
+   Dashboard — scoped modern styling (prefix .dash*)
+   Uses the global design tokens so it tracks light/dark themes.
+   ============================================================ */
+.dash { max-width: 1320px; margin: 0 auto; }
+
+/* Header */
+.dash-head { position:relative; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:22px; padding:24px 26px; border:1px solid var(--border); border-radius:22px; overflow:hidden; background:radial-gradient(circle at 92% 0%,color-mix(in srgb,var(--accent) 25%,transparent),transparent 38%),linear-gradient(120deg,color-mix(in srgb,var(--accent) 10%,var(--panel)),var(--panel) 64%); box-shadow:var(--shadow-sm); }
+.dash-head h2 { margin:0; font-size:clamp(24px,2.4vw,32px); letter-spacing:-.045em; }
+.dash-head .subtitle { color:var(--muted); font-size:13px; margin-top:3px; }
+.dash-head-actions { display:flex; align-items:center; gap:10px; }
+.dash-live { display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:600; color:var(--success);
+  background:var(--success-bg); padding:6px 11px; border-radius:999px; }
+.dash-live-dot { width:7px; height:7px; border-radius:50%; background:var(--success); box-shadow:0 0 0 0 var(--success);
+  animation:dashPulse 2s infinite; }
+@keyframes dashPulse { 0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--success) 55%, transparent);} 70%{box-shadow:0 0 0 7px transparent;} 100%{box-shadow:0 0 0 0 transparent;} }
+
+/* Generic card */
+.dash-card { background:linear-gradient(155deg,var(--panel),color-mix(in srgb,var(--neutral-bg) 22%,var(--panel))); border:1px solid var(--border); border-radius:18px;
+  box-shadow:var(--shadow-sm); padding:20px; }
+.dash-card-flush { padding:0; overflow:hidden; }
+.dash-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:16px; }
+.dash-card-flush .dash-card-head { padding:20px 20px 0; margin-bottom:12px; }
+.dash-card-head h3 { margin:0; font-size:15px; }
+.dash-card-sub { display:block; font-size:12px; color:var(--muted); margin-top:3px; }
+.dash-card-stat { font-family:"JetBrains Mono",monospace; font-size:18px; font-weight:700; }
+
+/* KPI tiles */
+.dash-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px; }
+.dash-kpi { position:relative; background:linear-gradient(145deg,var(--panel),color-mix(in srgb,var(--neutral-bg) 52%,var(--panel))); border:1px solid var(--border); border-radius:18px;
+  box-shadow:var(--shadow-sm); padding:20px 20px 18px; overflow:hidden; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.dash-kpi:hover { transform:translateY(-3px); box-shadow:var(--shadow-md); border-color:color-mix(in srgb,var(--kpi-accent,var(--accent)) 45%,var(--border)); }
+.dash-kpi::before { content:""; position:absolute; inset:0 auto 0 0; width:4px; background:var(--kpi-accent, var(--accent)); opacity:.9; }
+.dash-kpi-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.dash-kpi-icon { width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+  background:color-mix(in srgb, var(--kpi-accent, var(--accent)) 15%, var(--panel)); color:var(--kpi-accent, var(--accent)); }
+.dash-kpi-label { font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+.dash-kpi-value { font-family:"JetBrains Mono",monospace; font-size:28px; font-weight:700; line-height:1.1; margin-top:5px; letter-spacing:-.01em; }
+.dash-kpi-foot { font-size:12px; color:var(--muted); margin-top:7px; }
+.dash-kpi-foot .pos { color:var(--success); font-weight:600; }
+.dash-kpi-foot .neg { color:var(--danger); font-weight:600; }
+
+/* Secondary compact stat strip */
+.dash-stat-strip { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--border-soft);
+  border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; margin-bottom:20px; }
+.dash-stat { background:var(--panel); padding:13px 14px; text-align:center; }
+.dash-stat-v { font-family:"JetBrains Mono",monospace; font-size:17px; font-weight:700; color:var(--text); }
+.dash-stat-v.alert { color:var(--danger); }
+.dash-stat-k { font-size:11px; color:var(--muted); margin-top:3px; letter-spacing:.02em; }
+@media (max-width:1040px){ .dash-stat-strip { grid-template-columns:repeat(3,1fr); } }
+@media (max-width:560px){ .dash-stat-strip { grid-template-columns:repeat(2,1fr); } }
+
+/* Load/entry animations */
+@keyframes dashPop { from { opacity:0; transform:translateY(12px) scale(.98); } to { opacity:1; transform:none; } }
+@keyframes dashFade { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+@keyframes dashRise { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } }
+.dash-anim-pop  { opacity:0; animation:dashPop .5s cubic-bezier(.34,1.3,.5,1) forwards; }
+.dash-anim-fade { opacity:0; animation:dashFade .45s ease forwards; }
+.dash-anim-rise { opacity:0; animation:dashRise .55s cubic-bezier(.22,1,.36,1) forwards; }
+@media (prefers-reduced-motion: reduce) {
+  .dash-anim-pop, .dash-anim-fade, .dash-anim-rise { animation:none; opacity:1; }
+}
+
+/* Main 2-col grid: chart + roster */
+.dash-grid-main { display:grid; grid-template-columns:1.7fr 1fr; gap:16px; margin-bottom:20px; align-items:stretch; }
+.dash-grid-two  { display:grid; grid-template-columns:1fr 1.25fr; gap:16px; margin-bottom:20px; align-items:start; }
+.dash-chart-card { display:flex; flex-direction:column; }
+
+/* Revenue chart */
+.dash-chart { position:relative; width:100%; }
+.dash-chart svg { display:block; width:100%; height:auto; overflow:visible; }
+.dash-chart-cols { position:absolute; inset:0; display:flex; }
+.dash-chart-col { flex:1; cursor:pointer; }
+.dash-xlabels { display:flex; margin-top:8px; }
+.dash-xlabel { flex:1; text-align:center; font-size:11px; color:var(--muted); }
+.dash-tip { position:absolute; transform:translate(-50%,-115%); background:var(--text); color:var(--panel);
+  padding:6px 9px; border-radius:8px; font-size:11px; font-weight:600; white-space:nowrap; pointer-events:none;
+  opacity:0; transition:opacity .1s ease; box-shadow:var(--shadow-md); z-index:5; }
+.dash-tip .mono { font-family:"JetBrains Mono",monospace; }
+.dash-tip b { font-weight:700; }
+
+/* Roster */
+.dash-roster { display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto; }
+.dash-roster-row { display:flex; align-items:center; gap:11px; padding:9px 11px; border-radius:var(--radius-md);
+  background:var(--neutral-bg); }
+.dash-avatar { width:34px; height:34px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700; color:#fff; background:var(--accent); font-family:"JetBrains Mono",monospace; }
+.dash-roster-name { font-size:13px; font-weight:600; }
+.dash-roster-meta { font-size:11px; color:var(--muted); margin-top:1px; }
+.dash-roster-time { margin-left:auto; font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--muted); text-align:right; }
+.dash-pill { font-size:12px; font-weight:700; color:var(--accent); background:var(--accent-soft); padding:3px 10px; border-radius:999px; }
+
+/* Payment methods */
+.dash-method { margin-bottom:20px; }
+.dash-method-bar { display:flex; height:10px; border-radius:999px; overflow:hidden; background:var(--neutral-bg); margin:4px 0 16px;
+  gap:2px; }
+.dash-method-seg { height:100%; min-width:3px; }
+.dash-method-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; }
+.dash-method-item { background:var(--neutral-bg); border-radius:var(--radius-md); padding:13px 15px; }
+.dash-method-key { display:flex; align-items:center; gap:7px; font-size:12px; color:var(--muted); }
+.dash-method-dot { width:9px; height:9px; border-radius:3px; flex-shrink:0; }
+.dash-method-val { font-family:"JetBrains Mono",monospace; font-size:21px; font-weight:700; margin-top:5px; }
+.dash-method-fee { font-size:11px; margin-top:3px; }
+.dash-method-fee .neg { color:var(--danger); }
+.dash-method-fee .pos { color:var(--success); font-weight:700; }
+
+/* Branch cards */
+.dash-branches { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:14px; }
+.dash-branch { position:relative; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-sm); padding:0; overflow:hidden; transition:transform .15s ease, box-shadow .15s ease; }
+.dash-branch:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+.dash-branch-top { padding:15px 16px; border-bottom:1px solid var(--border-soft);
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  background:linear-gradient(135deg, color-mix(in srgb, var(--accent) 9%, var(--panel)), var(--panel)); }
+.dash-branch-top strong { font-size:14px; }
+.dash-branch-rev { padding:14px 16px 4px; }
+.dash-branch-rev-label { font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); }
+.dash-branch-rev-val { font-family:"JetBrains Mono",monospace; font-size:23px; font-weight:700; margin-top:2px; }
+.dash-branch-metrics { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border-soft); margin-top:12px; }
+.dash-branch-metric { background:var(--panel); padding:11px 16px; }
+.dash-branch-metric .v { font-family:"JetBrains Mono",monospace; font-size:16px; font-weight:700; }
+.dash-branch-metric .k { font-size:11px; color:var(--muted); margin-top:1px; }
+.dash-branch-metric.alert .v { color:var(--danger); }
+
+/* Station load bars */
+.dash-stations { display:flex; flex-direction:column; gap:14px; }
+.dash-station-row .t { display:flex; justify-content:space-between; align-items:baseline; font-size:13px; margin-bottom:6px; }
+.dash-station-row .t .mono { font-family:"JetBrains Mono",monospace; font-weight:700; }
+.dash-track { background:var(--neutral-bg); border-radius:999px; height:9px; overflow:hidden; }
+.dash-fill { height:100%; border-radius:999px; transition:width .35s cubic-bezier(.4,0,.2,1); min-width:4px; }
+
+/* Audit trail */
+.dash-audit { display:flex; flex-direction:column; }
+.dash-audit-row { display:flex; align-items:center; gap:12px; padding:13px 20px; border-top:1px solid var(--border-soft); font-size:13px; }
+.dash-audit-row:first-child { border-top:none; }
+.dash-audit-main { flex:1; min-width:0; }
+.dash-audit-title { display:flex; align-items:center; gap:9px; }
+.dash-audit-reason { font-size:11px; color:var(--muted); margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dash-audit-right { text-align:right; flex-shrink:0; }
+.dash-audit-amt { font-family:"JetBrains Mono",monospace; font-weight:700; }
+.dash-audit-meta { font-size:11px; color:var(--muted); margin-top:2px; }
+
+/* Analytics panel */
+.dash-analytics-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px; }
+.dash-analytics-filters { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.dash-analytics-filters input, .dash-analytics-filters select { font-size:12px; }
+.dash-rank-row { display:flex; align-items:center; gap:12px; }
+.dash-rank-num { width:24px; height:24px; border-radius:7px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700; font-family:"JetBrains Mono",monospace; background:var(--neutral-bg); color:var(--muted); }
+.dash-rank-row:nth-child(-n+3) .dash-rank-num { background:var(--accent-soft); color:var(--accent-dark); }
+.dash-rank-name { flex:2; min-width:120px; }
+.dash-rank-name .n { font-size:13px; font-weight:600; }
+.dash-rank-name .s { font-size:11px; color:var(--muted); }
+.dash-rank-bar { flex:3; }
+.dash-rank-fill { height:9px; background:var(--accent); border-radius:999px; opacity:.9; min-width:4px; }
+.dash-rank-val { text-align:right; min-width:84px; }
+.dash-rank-val .q { font-family:"JetBrains Mono",monospace; font-size:13px; font-weight:700; }
+.dash-rank-val .r { font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--muted); }
+
+.dash-empty { padding:26px 10px; text-align:center; color:var(--muted); font-size:13px; }
+
+/* Responsive */
+@media (max-width:1040px){
+  .dash-kpis { grid-template-columns:repeat(2,1fr); }
+  .dash-grid-main, .dash-grid-two { grid-template-columns:1fr; }
+}
+@media (max-width:560px){
+  .dash-kpis { grid-template-columns:1fr 1fr; gap:12px; }
+  .dash-kpi-value { font-size:24px; }
+  .page-body.dash { padding:16px; }
+}
+</style>
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="page-body dash">
+    <div class="dash-head">
+      <div>
+        <h2 id="pageTitle">Dashboard</h2>
+        <div class="subtitle" id="dashSubtitle">Live snapshot · updates automatically</div>
+      </div>
+      <div class="dash-head-actions">
+        <span class="dash-live"><span class="dash-live-dot"></span> Live</span>
+        <button onclick="spaRefreshPage()" class="btn dash-refresh" title="Refresh now">↻ Refresh</button>
+      </div>
+    </div>
+
+    <div id="kpiRow" class="dash-kpis"></div>
+    <div id="statStrip" class="dash-stat-strip"></div>
+
+    <div class="dash-grid-main dash-anim-rise" style="animation-delay:120ms;">
+      <section class="dash-card dash-chart-card">
+        <header class="dash-card-head">
+          <div><h3>Revenue</h3><span class="dash-card-sub">Last 7 days</span></div>
+          <div id="trendTotal" class="dash-card-stat"></div>
+        </header>
+        <div id="revenueTrend" class="dash-chart"></div>
+      </section>
+      <section class="dash-card">
+        <header class="dash-card-head">
+          <div><h3>On shift now</h3><span class="dash-card-sub">Currently clocked in</span></div>
+          <span id="rosterCount" class="dash-pill">0</span>
+        </header>
+        <div id="shiftRoster" class="dash-roster"></div>
+      </section>
+    </div>
+
+    <div id="methodRow" class="dash-method dash-anim-rise" style="animation-delay:180ms;"></div>
+
+    <!-- Business analytics: range-based KPIs and operational breakdowns -->
+    <section class="dash-card" id="businessAnalytics" style="margin-bottom:20px;">
+      <div class="dash-card-head" style="align-items:center;flex-wrap:wrap;">
+        <div><h3>Business analytics</h3><span class="dash-card-sub">Sales, order mix, product and staff performance for a selected period</span></div>
+        <a class="btn" href="reports" style="text-decoration:none;">Open full reports →</a>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;">
+        <label style="font-size:11px;color:var(--muted);">From<br><input type="date" id="bizFrom" style="margin-top:4px;"></label>
+        <label style="font-size:11px;color:var(--muted);">To<br><input type="date" id="bizTo" style="margin-top:4px;"></label>
+        <label id="bizBranchWrap" style="display:none;font-size:11px;color:var(--muted);">Branch<br><select id="bizBranch" style="margin-top:4px;"><option value="">All branches</option></select></label>
+        <button class="btn btn-primary" id="bizLoad" type="button">Load analytics</button>
+        <span id="bizStatus" style="font-size:12px;color:var(--muted);"></span>
+      </div>
+      <div id="bizKpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px;"></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+        <section class="dash-card" style="box-shadow:none;background:var(--neutral-bg);"><h3 style="font-size:13px;margin:0 0 12px;">Sales by order type</h3><div id="bizOrderTypes"></div></section>
+        <section class="dash-card" style="box-shadow:none;background:var(--neutral-bg);"><h3 style="font-size:13px;margin:0 0 12px;">Sales by category</h3><div id="bizCategories"></div></section>
+        <section class="dash-card" style="box-shadow:none;background:var(--neutral-bg);"><h3 style="font-size:13px;margin:0 0 12px;">Sales by weekday</h3><div id="bizWeekdays"></div></section>
+        <section class="dash-card" style="box-shadow:none;background:var(--neutral-bg);"><h3 style="font-size:13px;margin:0 0 12px;">Top employees by sales</h3><div id="bizEmployees"></div></section>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:12px;">Profit and food-cost metrics are shown only when reliable recipe, stock-consumption, and expense data are available. Sales figures use paid orders.</div>
+    </section>
+
+    <section class="dash-anim-rise" style="margin-bottom:20px; animation-delay:240ms;">
+      <h3 style="margin:0 0 12px; font-size:15px;">Branches</h3>
+      <div id="branchCards" class="dash-branches"></div>
+    </section>
+
+    <div class="dash-grid-two dash-anim-rise" style="animation-delay:300ms;">
+      <section class="dash-card">
+        <header class="dash-card-head">
+          <div><h3>Station load</h3><span class="dash-card-sub">Items plated today</span></div>
+        </header>
+        <div id="stationPerf" class="dash-stations"></div>
+      </section>
+      <section class="dash-card dash-card-flush">
+        <header class="dash-card-head">
+          <div><h3>Voids &amp; discounts</h3><span class="dash-card-sub">Today's audit trail</span></div>
+        </header>
+        <div id="auditTrail" class="dash-audit"></div>
+      </section>
+    </div>
+
+    <!-- Today's insight row -->
+    <div class="dash-grid-two dash-anim-rise" style="margin-bottom:20px; animation-delay:330ms;">
+      <section class="dash-card dash-card-flush">
+        <header class="dash-card-head">
+          <div><h3>Today's top sellers</h3><span class="dash-card-sub">What's moving right now</span></div>
+        </header>
+        <div id="topSellersToday" class="dash-audit"></div>
+      </section>
+      <section class="dash-card">
+        <header class="dash-card-head">
+          <div><h3>Today by the hour</h3><span class="dash-card-sub" id="peakHourSub">When the orders come in</span></div>
+        </header>
+        <div id="hourlyToday" class="dash-chart" style="height:150px;"></div>
+      </section>
+    </div>
+
+    <!-- Analytics Panel -->
+    <section class="dash-card">
+      <div class="dash-analytics-head">
+        <div><h3 style="margin:0; font-size:15px;">Item analytics</h3><span class="dash-card-sub">Top sellers by period</span></div>
+        <div class="dash-analytics-filters">
+          <input type="date" id="analyticsFrom" />
+          <input type="date" id="analyticsTo" />
+          <select id="analyticsStation"><option value="">All Stations</option></select>
+          <select id="analyticsBranch" style="display:none;"><option value="">All Branches</option></select>
+          <select id="analyticsSort">
+            <option value="qty">Most Popular</option>
+            <option value="revenue">Highest Revenue</option>
+            <option value="prep">Fastest Prep</option>
+          </select>
+          <button id="analyticsLoadBtn" class="btn btn-primary" style="font-size:12px; padding:6px 12px;">Load</button>
+        </div>
+      </div>
+      <div id="analyticsResult"></div>
+    </section>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="nav.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

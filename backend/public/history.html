@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>History — Restaurant POS</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="page-body narrow">
+    <div class="page-header">
+      <h2>Order History</h2>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <input id="searchOrderId" type="number" placeholder="Order # search" style="width:130px;" />
+        <div class="tabs" id="statusFilter">
+          <button class="tab active" data-status="">All</button>
+          <button class="tab" data-status="pending">Pending</button>
+          <button class="tab" data-status="preparing">Preparing</button>
+          <button class="tab" data-status="ready">Ready</button>
+          <button class="tab" data-status="dispatched">Dispatched</button>
+          <button class="tab" data-status="paid">Paid</button>
+          <button class="tab" data-status="voided">Voided</button>
+        </div>
+        <button onclick="spaRefreshPage()" class="btn" style="font-size:12px; padding:6px 12px;" title="Refresh">↻ Refresh</button>
+      </div>
+    </div>
+    <div id="orderList" style="display:flex; flex-direction:column; gap:10px;"></div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="nav.js"></script>
+  <script src="printing.js"></script>
+  <script src="history.js"></script>
+</body>
+</html>

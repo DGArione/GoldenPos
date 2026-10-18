@@ -1,0 +1,15 @@
+GOLDEN POS V20 - EASIER TO INSTALL AND OPEN
+===========================================
+
+- INSTALL-POS.cmd: double-click to install or update (asks for admin itself).
+- OPEN-POS.cmd / "Golden POS" desktop icon: double-click to open. Starts the
+  POS if it isn't running (first time: sets itself up), shows a "please wait"
+  window, then opens the POS with silent printing. Friendly messages if Node.js
+  is missing or something fails. No admin rights needed.
+- "Golden POS Control" desktop shortcut with a plain-English menu.
+- START-HERE.txt: one-page instructions.
+
+The screen simplifications tried in this version (renamed menus, role-based
+menus, home screen, settings tabs, printer wizard, payment/order changes)
+were REVERTED - all screens and features are exactly as in V19.
+web/src/components/PrinterSetup.tsx is unused and can be deleted.

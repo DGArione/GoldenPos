@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Login — Restaurant POS</title>
+<link rel="stylesheet" href="style.css"/>
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { min-height: 100vh; font-family: var(--font-family-override, "Poppins"), -apple-system, sans-serif; background: var(--bg); color: var(--text); }
+
+/* ===== Login layouts — a centered card; the look is set by the
+   body[data-login-layout="..."] attribute (Settings → Login Page). ===== */
+.login-shell { display: flex; min-height: 100vh; }
+.login-hero { display: none; }                 /* the centered styles don't use a side hero */
+
+/* Giant ghost business name (Bold Brand layout) */
+#loginGhost { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; z-index: 0; pointer-events: none; overflow: hidden; }
+#loginGhost span { font-size: 24vw; font-weight: 900; color: var(--accent); opacity: .07; white-space: nowrap; letter-spacing: -.05em; line-height: 1; }
+
+.login-hero_unused {
+  flex: 1.15; position: relative; display: flex; align-items: flex-end;
+  padding: 56px; color: #fff; overflow: hidden;
+  background-color: var(--accent-dark);
+  background-image: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+  background-size: cover; background-position: center;
+}
+.login-hero.has-image { background-image: none; }         /* image set inline via JS */
+.login-hero-tint { position: absolute; inset: 0; background: linear-gradient(120deg, rgba(10,8,6,.72) 0%, rgba(10,8,6,.30) 55%, rgba(10,8,6,.15) 100%); }
+.login-hero-inner { position: relative; z-index: 1; max-width: 460px; }
+.login-hero-badge {
+  display: inline-flex; align-items: center; gap: 9px; margin-bottom: 26px;
+  background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22);
+  padding: 8px 14px 8px 8px; border-radius: 999px; backdrop-filter: blur(6px);
+}
+.login-hero-badge .mark { width: 34px; height: 34px; border-radius: 9px; background: rgba(255,255,255,.18); display: flex; align-items: center; justify-content: center; }
+.login-hero-badge img { width: 34px; height: 34px; border-radius: 9px; object-fit: cover; }
+.login-hero-badge span { font-weight: 700; font-size: 14px; letter-spacing: .01em; }
+.login-hero-title { font-size: 42px; line-height: 1.08; font-weight: 800; letter-spacing: -.03em; margin: 0 0 14px; }
+.login-hero-tag { font-size: 16px; line-height: 1.5; opacity: .9; margin: 0 0 28px; max-width: 420px; }
+.login-hero-points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 11px; }
+.login-hero-points li { display: flex; align-items: center; gap: 11px; font-size: 14px; opacity: .92; }
+.login-hero-points .tick { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,.18); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; }
+
+.login-pane { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 28px; min-height: 100vh; position: relative; }
+.login-card {
+  width: 384px; max-width: 100%; text-align: center; position: relative; z-index: 2;
+  background: var(--panel); border: 1.5px solid var(--border); border-radius: 20px;
+  padding: 40px 34px; box-shadow: 0 3px 0 rgba(120,100,60,.12), 0 26px 60px -24px rgba(31,28,16,.5);
+}
+.login-logo { margin-bottom: 8px; display: flex; justify-content: center; }
+.login-logo svg, .login-logo img { width: 60px; height: 60px; padding: 13px; border-radius: 50%; border: 2.5px solid var(--accent); background: var(--accent-soft); color: var(--accent); box-sizing: border-box; }
+.login-logo img { padding: 0; object-fit: cover; }
+.login-brand { font-family: "Poppins", sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 0; color: var(--text); margin: 8px 0 2px; }
+.login-muted { color: var(--muted); font-family: "Poppins", sans-serif; font-size: 18px; margin: 0 0 22px; }
+
+/* Segmented method toggle */
+.login-methods { display: flex; gap: 4px; background: var(--neutral-bg); padding: 4px; border-radius: 12px; margin-bottom: 20px; }
+.login-methods .pin-btn {
+  flex: 1; padding: 10px 6px; font-size: 13px; font-weight: 600; border-radius: 9px;
+  border: 1px solid transparent; background: transparent; color: var(--muted); cursor: pointer; font-family: inherit;
+  transition: background .14s ease, color .14s ease, box-shadow .14s ease;
+}
+.login-methods .pin-btn.active { background: var(--panel); color: var(--text); box-shadow: var(--shadow-sm); }
+
+/* PIN pad */
+.pin-dots { display: flex; justify-content: center; gap: 12px; margin-bottom: 22px; min-height: 13px; }
+.pin-dot { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--border); background: transparent; transition: all .15s ease; }
+.pin-dot.filled { background: var(--accent); border-color: var(--accent); transform: scale(1.15); }
+.pin-pad { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 8px; }
+.pin-btn {
+  padding: 17px 8px; font-size: 20px; font-weight: 700; border-radius: 13px;
+  border: 1.5px solid var(--border); background: var(--panel); color: var(--text);
+  cursor: pointer; font-family: inherit; transition: background .12s ease, border-color .12s ease, transform .08s ease;
+}
+.pin-btn:hover { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
+.pin-btn:active { transform: translateY(2px); }
+.pin-btn-go { background: var(--accent) !important; color: #fff !important; border-color: transparent !important; font-size: 16px !important; box-shadow: 0 3px 0 var(--accent-dark); }
+.pin-btn-go:hover { background: var(--accent) !important; }
+.pin-btn-go:active { transform: translateY(3px); box-shadow: 0 0 0 var(--accent-dark); }
+.pin-btn-clear { font-size: 18px !important; }
+
+.login-field {
+  width: 100%; margin-bottom: 10px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 11px;
+  font-size: 14px; background: color-mix(in srgb, var(--neutral-bg) 55%, var(--panel)); color: var(--text); font-family: inherit; outline: none;
+  transition: border-color .14s ease, box-shadow .14s ease;
+}
+.login-field:focus { border-color: var(--accent); background: var(--panel); box-shadow: 0 0 0 3px var(--accent-soft); }
+#passwordMode .pin-btn-go, #changePasswordMode .pin-btn-go { width: 100%; padding: 14px; font-size: 14px; border-radius: 11px; margin-top: 2px; }
+
+.login-error { color: var(--danger); font-size: 13px; min-height: 18px; margin: 10px 0 2px; }
+.login-online { margin-top: 12px; }
+.login-online a { font-size: 13px; color: var(--accent); text-decoration: none; font-weight: 600; opacity: .85; }
+.login-online a:hover { opacity: 1; }
+
+@media (max-width: 900px) {
+  .login-hero { display: none; }
+}
+
+/* ============================================================
+   HANDCRAFTED LOGIN LAYOUTS — set by body[data-login-layout="..."]
+   (admin picks this in Settings → Login Page). Default = chalkboard.
+   ============================================================ */
+
+/* ---- Chalkboard hero panel (left side, "chalkboard" layout only) ---- */
+.login-hero {
+  flex: 1.05; position: relative; overflow: hidden;
+  flex-direction: column; justify-content: space-between; padding: 54px 50px;
+  color: #ece4cd; background-color: #2c3420;
+  background-image:
+    radial-gradient(rgba(236,228,205,.05) 1px, transparent 1px),
+    radial-gradient(rgba(236,228,205,.04) 1px, transparent 1px);
+  background-size: 22px 22px, 36px 36px; background-position: 0 0, 11px 18px;
+  border-right: 6px solid #241a0f;
+}
+.hero-top { display: flex; align-items: center; gap: 12px; position: relative; z-index: 2; }
+.hero-mark { width: 48px; height: 48px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
+.hero-eyebrow { font-family: "Oswald", sans-serif; letter-spacing: .32em; font-size: 11px; text-transform: uppercase; opacity: .82; }
+.hero-mid { position: relative; z-index: 2; }
+.hero-script { font-family: "Poppins", sans-serif; font-size: clamp(42px, 5vw, 66px); line-height: 1.04; color: #f4e9cf; }
+.hero-tag { font-family: "Poppins", sans-serif; font-size: 25px; margin-top: 14px; opacity: .92; max-width: 440px; line-height: 1.3; }
+.hero-foot { position: relative; z-index: 2; font-family: "Oswald", sans-serif; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; opacity: .68; }
+.hero-doodle { position: absolute; opacity: .13; color: #f4e9cf; z-index: 1; pointer-events: none; }
+.hero-doodle.cup { right: 40px; top: 33%; width: 180px; }
+.hero-doodle.wave { left: -20px; right: -20px; bottom: 96px; width: calc(100% + 40px); }
+
+/* Hero hidden by default; only the chalkboard layout shows it */
+.login-hero { display: none; }
+body[data-login-layout="chalkboard"] .login-hero { display: flex; }
+
+/* ---- Kraft Ticket: one warm card with a dashed receipt frame ---- */
+body[data-login-layout="kraft-ticket"] .login-pane { background: var(--bg); }
+body[data-login-layout="kraft-ticket"] .login-card {
+  border: 1.5px solid var(--border);
+  outline: 2px dashed color-mix(in srgb, var(--accent) 45%, var(--border));
+  outline-offset: -11px; border-radius: 12px;
+}
+
+/* ---- Seaside: golden sun glow behind the card + a hand-drawn wave ---- */
+body[data-login-layout="seaside"] .login-pane { background: var(--bg); overflow: hidden; }
+body[data-login-layout="seaside"] .login-pane::before {
+  content: ""; position: absolute; width: 440px; height: 440px; border-radius: 50%; top: -130px; z-index: 0;
+  background: radial-gradient(circle, color-mix(in srgb, var(--sun, #e0a040) 55%, transparent), transparent 70%);
+}
+body[data-login-layout="seaside"] .login-pane::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 64px; z-index: 0; opacity: .6;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='64' viewBox='0 0 220 64'%3E%3Cpath d='M0 40 Q 27 20 55 40 T 110 40 T 165 40 T 220 40' stroke='%234c5738' stroke-width='3' fill='none'/%3E%3Cpath d='M0 54 Q 27 36 55 54 T 110 54 T 165 54 T 220 54' stroke='%23b06a38' stroke-width='3' fill='none'/%3E%3C/svg%3E") repeat-x bottom;
+  background-size: 220px 64px;
+}
+
+/* ===== FIRST-RUN SETUP POPUP ===== */
+.setup-backdrop { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.setup-modal { background: var(--panel,#fff); border-radius: 22px; padding: 36px 32px; width: 400px; max-width: 94vw; box-shadow: 0 28px 70px rgba(0,0,0,0.3); border: 1px solid var(--border-soft,#f0e9da); text-align: center; animation: setupPop 0.25s cubic-bezier(.34,1.56,.64,1); }
+@keyframes setupPop { from { opacity:0; transform:scale(0.9) translateY(14px); } to { opacity:1; transform:none; } }
+.setup-modal-icon { font-size: 34px; margin-bottom: 10px; }
+.setup-modal h2 { font-size: 21px; font-weight: 800; color: var(--text,#221c14); margin: 0 0 4px; }
+.setup-modal p  { font-size: 13px; color: var(--muted,#8c8071); margin: 0 0 24px; line-height: 1.5; }
+.setup-field { margin-bottom: 14px; text-align: left; }
+.setup-field label { display: block; font-size: 12px; font-weight: 600; color: var(--text,#221c14); margin-bottom: 5px; }
+.setup-field input { width: 100%; padding: 11px 13px; border-radius: 11px; border: 1px solid var(--border,#e6decb); background: var(--neutral-bg,#efe9dd); color: var(--text,#221c14); font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.12s, box-shadow 0.12s; }
+.setup-field input:focus { border-color: var(--accent,#8a5a34); box-shadow: 0 0 0 3px var(--accent-soft,#f1e4d3); }
+.setup-hint { font-size: 11px; color: var(--muted,#8c8071); margin-top: 4px; }
+.setup-error { color: var(--danger,#b23b30); font-size: 12px; min-height: 16px; margin-bottom: 12px; text-align: left; }
+.setup-btn { width: 100%; padding: 13px; border-radius: 12px; border: none; background: var(--accent,#8a5a34); color: white; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.12s, transform 0.08s; }
+.setup-btn:hover  { background: var(--accent-dark,#6e4527); }
+.setup-btn:active { transform: scale(0.98); }
+.setup-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.setup-back-btn { width: 100%; margin-top: 8px; padding: 10px; border: none; background: transparent; color: var(--muted,#8c8071); cursor: pointer; font-family: inherit; font-size: 13px; }
+.setup-back-btn:hover { color: var(--text,#221c14); }
+.setup-step { display: none; }
+.setup-step.active { display: block; }
+.setup-success-icon { font-size: 52px; margin-bottom: 14px; }
+.setup-progress { display: flex; gap: 6px; justify-content: center; margin-bottom: 24px; }
+.setup-progress-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border,#e6decb); transition: background 0.2s; }
+.setup-progress-dot.active { background: var(--accent,#8a5a34); }
+</style>
+</head>
+<body>
+  <!-- ===== FIRST-RUN ADMIN SETUP POPUP ===== -->
+  <div class="setup-backdrop" id="setupBackdrop" style="display:none;">
+    <div class="setup-modal">
+      <div class="setup-modal-icon">🍽️</div>
+      <h2>First-time Setup</h2>
+      <p>No admin account found. Create one to get started.</p>
+      <div class="setup-progress">
+        <div class="setup-progress-dot active" id="sdot1"></div>
+        <div class="setup-progress-dot" id="sdot2"></div>
+      </div>
+      <!-- Step 1 -->
+      <div class="setup-step active" id="setupStep1">
+        <div class="setup-field"><label>Admin display name</label>
+          <input id="setupName" type="text" placeholder="e.g. Admin" autocomplete="off" /></div>
+        <div class="setup-field"><label>Username</label>
+          <input id="setupUsername" type="text" placeholder="e.g. admin" autocomplete="off" autocapitalize="none" />
+          <div class="setup-hint">Used to log in — no spaces, min 3 characters.</div></div>
+        <div class="setup-field"><label>Password</label>
+          <input id="setupPassword" type="password" placeholder="Min 6 characters" autocomplete="new-password" /></div>
+        <div class="setup-field"><label>Confirm password</label>
+          <input id="setupPassword2" type="password" placeholder="Re-enter password" autocomplete="new-password" /></div>
+        <div class="setup-error" id="setupStep1Err"></div>
+        <button class="setup-btn" onclick="setupNext()">Next →</button>
+      </div>
+      <!-- Step 2 -->
+      <div class="setup-step" id="setupStep2">
+        <div style="background:var(--neutral-bg,#efe9dd); border-radius:12px; padding:16px 18px; margin-bottom:18px; text-align:left;">
+          <div style="font-size:12px; color:var(--muted,#8c8071); margin-bottom:2px;">Display name</div>
+          <div id="reviewName" style="font-weight:700; font-size:15px; margin-bottom:10px;"></div>
+          <div style="font-size:12px; color:var(--muted,#8c8071); margin-bottom:2px;">Username</div>
+          <div id="reviewUsername" style="font-weight:700; font-size:15px; margin-bottom:10px; font-family:monospace;"></div>
+          <div style="font-size:12px; color:var(--muted,#8c8071); margin-bottom:2px;">Password</div>
+          <div style="font-weight:700; font-size:15px; letter-spacing:3px;">••••••</div>
+        </div>
+        <div class="setup-error" id="setupStep2Err"></div>
+        <button class="setup-btn" id="setupCreateBtn" onclick="setupCreate()">Create Admin Account</button>
+        <button class="setup-back-btn" onclick="setupBack()">← Back</button>
+      </div>
+      <!-- Step 3 -->
+      <div class="setup-step" id="setupStep3">
+        <div style="text-align:center; padding:8px 0 16px;">
+          <div class="setup-success-icon">✅</div>
+          <div style="font-size:17px; font-weight:800; margin-bottom:6px; color:var(--text,#221c14);">Admin account created!</div>
+          <div style="font-size:13px; color:var(--muted,#8c8071); margin-bottom:6px;">Log in with:</div>
+          <div style="font-size:13px; font-weight:600; margin-bottom:4px;">Username: <span id="successUsername" style="font-family:monospace; color:var(--accent,#8a5a34);"></span></div>
+          <div style="font-size:12px; color:var(--muted,#8c8071); margin-bottom:22px;">Switch to <strong>Password</strong> login mode below.</div>
+          <button class="setup-btn" onclick="setupDone()">Go to Login →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-shell">
+    <!-- ===== Customizable hero (image + brand) ===== -->
+    <aside class="login-hero" id="loginHero">
+      <div class="hero-top">
+        <span class="hero-mark">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 3v6a2 2 0 1 0 4 0V3"/><path d="M9 9v12"/><path d="M17 3c-1.6 0-3 2-3 5s1.4 5 3 5"/><path d="M17 13v8"/>
+          </svg>
+        </span>
+        <span class="hero-eyebrow" data-brand-name>Restaurant POS</span>
+      </div>
+
+      <div class="hero-mid">
+        <div class="hero-script">Good food,<br/>golden hours.</div>
+        <div class="hero-tag">Welcome back — let's get the kitchen humming.</div>
+      </div>
+
+      <div class="hero-foot" data-brand-name>Restaurant POS</div>
+
+      <!-- hand-drawn doodles -->
+      <svg class="hero-doodle cup" viewBox="0 0 120 92" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 34 h62 v18 a24 24 0 0 1 -24 24 h-14 a24 24 0 0 1 -24 -24 z"/>
+        <path d="M84 40 h12 a10 10 0 0 1 0 20 h-11"/>
+        <path d="M38 22 q7 -9 0 -16"/><path d="M52 22 q7 -9 0 -16"/><path d="M66 22 q7 -9 0 -16"/>
+        <path d="M28 86 h50"/>
+      </svg>
+      <svg class="hero-doodle wave" viewBox="0 0 400 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+        <path d="M2 12 Q 27 2 52 12 T 102 12 T 152 12 T 202 12 T 252 12 T 302 12 T 352 12 T 398 12"/>
+      </svg>
+    </aside>
+
+    <!-- ===== Login pane ===== -->
+    <main class="login-pane">
+      <!-- Giant ghost brand name — only shown by the "Bold Brand" layout -->
+      <div id="loginGhost"><span data-brand-name>Restaurant POS</span></div>
+      <div class="login-card">
+        <div class="login-logo">
+          <img data-brand-logo src="" alt="" style="display:none;"/>
+          <svg id="defaultBrandIcon" width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 3v6a2 2 0 1 0 4 0V3"/><path d="M9 9v12"/><path d="M17 3c-1.6 0-3 2-3 5s1.4 5 3 5"/><path d="M17 13v8"/>
+          </svg>
+        </div>
+        <h1 class="login-brand" data-brand-name>Restaurant POS</h1>
+        <p class="login-muted" id="loginSubtitle">Select login method</p>
+
+        <div class="login-methods">
+          <button class="pin-btn" id="btnChoosePin" onclick="switchMode('pin')">🔢 PIN</button>
+          <button class="pin-btn" id="btnChoosePw" onclick="switchMode('password')">🔑 Password</button>
+        </div>
+
+        <div id="pinMode">
+          <div class="pin-dots" id="pinDots"></div>
+          <div class="pin-pad" id="numpad"></div>
+        </div>
+
+        <div id="passwordMode" style="display:none;">
+          <input id="pwUsername" class="login-field" placeholder="Username" autocomplete="username"/>
+          <input id="pwPassword" class="login-field" type="password" placeholder="Password" autocomplete="current-password"/>
+          <button class="pin-btn pin-btn-go" onclick="attemptPasswordLogin()">Login</button>
+        </div>
+
+        <div id="changePasswordMode" style="display:none;">
+          <p style="font-size:12px;color:var(--accent);margin:0 0 12px;font-weight:600;">First login — please set a new password</p>
+          <input id="newPw1" class="login-field" type="password" placeholder="New password (min 6 chars)"/>
+          <input id="newPw2" class="login-field" type="password" placeholder="Confirm new password"/>
+          <button class="pin-btn pin-btn-go" onclick="setNewPassword()">Set Password &amp; Login</button>
+        </div>
+
+        <p class="login-error" id="errorMsg"></p>
+        <div class="login-online"><a href="online-order">🌐 Order online →</a></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="login.js"></script>
+
+  <!-- ===== FIRST-RUN SETUP LOGIC ===== -->
+  <script>
+  (function() {
+    function showStep(n) {
+      [1,2,3].forEach(i => { var el = document.getElementById('setupStep' + i); if (el) el.classList.toggle('active', i === n); });
+      var d1 = document.getElementById('sdot1'), d2 = document.getElementById('sdot2');
+      if (d1) d1.classList.toggle('active', n <= 1);
+      if (d2) d2.classList.toggle('active', n === 2);
+    }
+    window.setupNext = function() {
+      var name=document.getElementById('setupName').value.trim(), uname=document.getElementById('setupUsername').value.trim();
+      var pw1=document.getElementById('setupPassword').value, pw2=document.getElementById('setupPassword2').value;
+      var err=document.getElementById('setupStep1Err');
+      if (!name) { err.textContent='Display name is required.'; return; }
+      if (!uname) { err.textContent='Username is required.'; return; }
+      if (uname.length<3) { err.textContent='Username must be at least 3 characters.'; return; }
+      if (/\s/.test(uname)) { err.textContent='Username cannot contain spaces.'; return; }
+      if (pw1.length<6) { err.textContent='Password must be at least 6 characters.'; return; }
+      if (pw1!==pw2) { err.textContent='Passwords do not match.'; return; }
+      err.textContent='';
+      document.getElementById('reviewName').textContent=name;
+      document.getElementById('reviewUsername').textContent=uname;
+      document.getElementById('setupStep2Err').textContent='';
+      showStep(2);
+    };
+    window.setupBack = function() { document.getElementById('setupStep2Err').textContent=''; showStep(1); };
+    window.setupCreate = async function() {
+      var name=document.getElementById('setupName').value.trim(), username=document.getElementById('setupUsername').value.trim(), password=document.getElementById('setupPassword').value;
+      var btn=document.getElementById('setupCreateBtn'), err=document.getElementById('setupStep2Err');
+      btn.disabled=true; btn.textContent='Creating…'; err.textContent='';
+      try {
+        var res=await fetch('api/public/create-admin',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:name,username:username,password:password}) });
+        var data=await res.json();
+        if (!res.ok) { err.textContent=data.error||'Something went wrong. Try again.'; btn.disabled=false; btn.textContent='Create Admin Account'; return; }
+        document.getElementById('successUsername').textContent=username; showStep(3);
+      } catch (e) { err.textContent='Connection error. Try again.'; btn.disabled=false; btn.textContent='Create Admin Account'; }
+    };
+    window.setupDone = function() {
+      document.getElementById('setupBackdrop').style.display='none';
+      if (typeof switchMode==='function') switchMode('password');
+      var uname=document.getElementById('setupUsername'), pwUname=document.getElementById('pwUsername');
+      if (uname && pwUname) pwUname.value=uname.value.trim();
+      setTimeout(function(){ var pwEl=document.getElementById('pwPassword'); if (pwEl) pwEl.focus(); }, 80);
+    };
+    ['setupName','setupUsername','setupPassword','setupPassword2'].forEach(function(id){
+      var el=document.getElementById(id);
+      if (el) el.addEventListener('keydown', function(e){ if (e.key==='Enter') window.setupNext(); });
+    });
+    async function checkAdmin() {
+      try {
+        var res=await fetch('api/public/has-admin'); var data=await res.json();
+        if (!data.hasAdmin) { document.getElementById('setupBackdrop').style.display='flex';
+          setTimeout(function(){ var el=document.getElementById('setupName'); if (el) el.focus(); }, 120); }
+      } catch (e) {}
+    }
+    checkAdmin();
+  })();
+  </script>
+
+  <!-- ===== Branding loader (customizable hero image + logo + name) ===== -->
+  <script>
+    (async () => {
+      let s = {};
+      try { const r = await fetch("api/public/settings"); const data = await r.json(); if (r.ok) s = data; } catch(e) {}
+
+      const biz    = s.businessName || "Restaurant POS";
+      const LAYOUTS = ["chalkboard", "kraft-ticket", "seaside"];
+      const layout = LAYOUTS.includes(s.loginLayout) ? s.loginLayout : "chalkboard";
+
+      // Brand name everywhere
+      document.querySelectorAll("[data-brand-name]").forEach(el => el.textContent = biz);
+
+      // Apply the chosen handcrafted login layout (Settings → Login Page).
+      document.body.dataset.loginLayout = layout;
+
+      // Optional: give the login page its own palette, independent of the app.
+      if (s.loginThemeId && typeof posApplyThemeById === "function") posApplyThemeById(s.loginThemeId);
+
+      // Logo: replace the default marks with the uploaded logo
+      if (s.logoUrl) {
+        document.querySelectorAll("[data-brand-logo]").forEach(img => { img.src = s.logoUrl; img.style.display = ""; });
+        const ico = document.getElementById("defaultBrandIcon"); if (ico) ico.style.display = "none";
+        const mark = document.getElementById("heroMark"); if (mark) mark.style.display = "none";
+      }
+    })();
+  </script>
+</body>
+</html>

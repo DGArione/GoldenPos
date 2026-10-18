@@ -1,0 +1,17 @@
+{
+  "name": "rapidpos",
+  "version": "1.0.0",
+  "description": "Restaurant Point-of-Sale — Node.js port of the PHP SPA (Express + built-in SQLite)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "private": true
+}

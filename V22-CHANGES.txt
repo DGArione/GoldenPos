@@ -1,0 +1,36 @@
+GOLDEN POS - V22 CHANGES
+========================
+
+1. CUSTOMER QR MENU (phone) - redesigned
+   - Reads like a real beach-cafe menu: sections per category, sticky category
+     bar, search, dish photos, "Add" then - 2 + right on the dish.
+   - Tap a dish to see a big photo. Sold-out dishes show "Sold out today".
+   - Clear messages instead of "No dishes found":
+       * menu has no dishes for this table's branch -> "The menu isn't online yet"
+       * menu could not load -> the real reason + "Try again"
+   - Photos load fast on mobile data: each photo is its own cached image
+     (/api/public/menu-image/<id>), not packed inside the menu.
+   - Menu admin: any phone photo can be used - it is shrunk to ~800 px
+     automatically when you pick it.
+
+2. ACCOUNT PERMISSIONS - one clear rule set (enforced by the server)
+   - Admin manages everyone. Super manager manages managers and staff.
+     Manager manages staff (server, cashier, kitchen, finance) of their own
+     branch only.
+   - You can only give a role BELOW your own (an admin may create admins).
+   - Nobody can delete, suspend, change the role / sign-in type, or change
+     the pay of THEIR OWN account. You can still change your own name and PIN.
+   - The last active admin can never be deleted, suspended or demoted.
+   - Users and System Admin screens show "You" on your own row and hide
+     buttons you are not allowed to use.
+
+3. RESTORE A BACKUP (System Admin > Backups, admin only)
+   - Every backup has a Restore button. The dialog shows what is inside
+     (orders, menu items, users, last order) before you confirm.
+   - A safety copy of the current data is saved first, so a restore can be
+     undone by restoring the "safety copy".
+   - "Restore from a file" accepts a .db backup (USB stick / mirror folder)
+     or the .json file from "Download all data".
+   - The POS restarts with the restored data (~20 s) and asks for a PIN.
+
+4. Health check: "last backup" is now based on the real backup files.

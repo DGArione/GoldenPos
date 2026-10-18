@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Reports — Restaurant POS</title>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div id="navbar"></div>
+  <div class="page-body narrow">
+    <div class="page-header">
+      <h2 id="pageTitle">Reports</h2>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div class="tabs" id="rangeTabs">
+          <button class="tab active" data-range="today">Today</button>
+          <button class="tab" data-range="week">This Week</button>
+          <button class="tab" data-range="month">This Month</button>
+          <button class="tab" data-range="all">All Time</button>
+        </div>
+        <button onclick="spaRefreshPage()" class="btn" style="font-size:12px; padding:6px 12px;">↻ Refresh</button>
+      </div>
+    </div>
+
+    <!-- Quick KPIs -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; margin-bottom:24px;">
+      <div class="card" style="padding:16px; text-align:center;">
+        <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">Revenue</div>
+        <div class="mono" id="kpiRevenue" style="font-size:22px; font-weight:700; color:var(--accent);">—</div>
+      </div>
+      <div class="card" style="padding:16px; text-align:center;">
+        <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">Orders</div>
+        <div class="mono" id="kpiOrders" style="font-size:22px; font-weight:700;">—</div>
+      </div>
+      <div class="card" style="padding:16px; text-align:center;">
+        <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">Avg Order</div>
+        <div class="mono" id="kpiAvg" style="font-size:22px; font-weight:700;">—</div>
+      </div>
+      <div class="card" style="padding:16px; text-align:center;">
+        <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">Voids</div>
+        <div class="mono" id="kpiVoids" style="font-size:22px; font-weight:700; color:var(--danger);">—</div>
+      </div>
+      <div class="card" style="padding:16px; text-align:center;">
+        <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">Refunds</div>
+        <div class="mono" id="kpiRefunds" style="font-size:22px; font-weight:700; color:var(--danger);">—</div>
+      </div>
+    </div>
+
+    <!-- Advanced report builder -->
+    <div class="card" style="padding:20px; margin-bottom:22px;">
+      <div style="font-size:14px; font-weight:700; margin-bottom:4px;">📅 Report for a specific date or range</div>
+      <div style="font-size:11px; color:var(--muted); margin-bottom:14px;">
+        Pick a single day (set From and To to the same date) or a range, then Load Report.
+      </div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;">
+        <button class="btn rpt-quick" data-quick="today" style="font-size:12px; padding:5px 12px;">Today</button>
+        <button class="btn rpt-quick" data-quick="yesterday" style="font-size:12px; padding:5px 12px;">Yesterday</button>
+        <button class="btn rpt-quick" data-quick="7" style="font-size:12px; padding:5px 12px;">Last 7 days</button>
+        <button class="btn rpt-quick" data-quick="30" style="font-size:12px; padding:5px 12px;">Last 30 days</button>
+        <button class="btn rpt-quick" data-quick="month" style="font-size:12px; padding:5px 12px;">This month</button>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; margin-bottom:14px;">
+        <div>
+          <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">From</div>
+          <input type="date" id="rptFrom" style="font-size:13px;"/>
+        </div>
+        <div>
+          <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">To</div>
+          <input type="date" id="rptTo" style="font-size:13px;"/>
+        </div>
+        <div id="rptBranchWrap" style="display:none;">
+          <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">Branch</div>
+          <select id="rptBranch" style="font-size:13px;"><option value="">All Branches</option></select>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button id="rptLoadBtn" class="btn btn-primary" style="font-size:13px; padding:8px 16px;">Load Report</button>
+        <button id="rptCsvBtn"  class="btn" style="font-size:13px; padding:8px 16px; display:none;">⬇ Download CSV</button>
+        <button id="rptPdfBtn"  class="btn" style="font-size:13px; padding:8px 16px; display:none;">⬇ Download PDF</button>
+      </div>
+    </div>
+
+    <!-- Report output -->
+    <div id="reportOutput"></div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="nav.js"></script>
+  <script src="reports.js"></script>
+</body>
+</html>

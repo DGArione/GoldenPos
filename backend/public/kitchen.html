@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Kitchen — Restaurant POS</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="page-body">
+    <div class="page-header">
+      <div>
+        <h2>Pending Tickets</h2>
+        <div class="subtitle">Auto-refreshes every few seconds.</div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button id="readyAllBtn" class="btn btn-primary" style="font-size:12px; padding:7px 14px;" title="Mark every item on this station's tickets as ready">✅ Ready All</button>
+        <button id="cancelAllBtn" class="btn btn-danger" style="font-size:12px; padding:7px 14px;" title="Void every ticket shown on this station">✖ Cancel All</button>
+        <button onclick="spaRefreshPage()" class="btn" style="font-size:12px; padding:6px 12px;" title="Refresh">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="tabs" id="kitchenViewTabs" style="margin-bottom: 14px;">
+      <button class="tab active" data-view="tickets">Tickets</button>
+      <button class="tab" data-view="issues">Order Issues</button>
+      <button class="tab" data-view="history">History</button>
+    </div>
+    <div class="tabs" id="stationTabs" style="margin-bottom: 16px;"></div>
+    <div id="tickets" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px;"></div>
+    <div id="issuesPanel" style="display:none;"></div>
+    <div id="historyPanel" style="display:none;"></div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="nav.js"></script>
+  <script src="kitchen.js"></script>
+</body>
+</html>

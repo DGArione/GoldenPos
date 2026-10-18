@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Staff — Restaurant POS</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="page-body narrow">
+    <div class="page-header"><h2 id="pageTitle">Users</h2></div>
+
+    <div class="card" style="padding: 18px; margin-bottom: 22px;">
+      <div style="font-size:13px; font-weight:600; margin-bottom:12px;">Add New Staff Member</div>
+
+      <!-- Row 1: name, role, branch -->
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+        <input id="newName" placeholder="Full name" style="flex:2; min-width:140px;" />
+        <select id="newRole" style="flex:1; min-width:110px;">
+          <option value="server">Server</option>
+          <option value="cashier">Cashier</option>
+          <option value="kitchen">Kitchen</option>
+          <option value="finance">Finance</option>
+          <option value="manager">Manager</option>
+        </select>
+        <select id="newBranch" style="flex:1; min-width:130px; display:none;"></select>
+      </div>
+
+      <!-- Row 2: pay -->
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+        <input id="newPayRate" placeholder="Pay rate" type="number" step="0.01" style="width:110px;" />
+        <select id="newPayType" style="width:110px;">
+          <option value="hourly">Per Hour</option>
+          <option value="daily">Per Day</option>
+        </select>
+      </div>
+
+      <!-- Row 3: auth method -->
+      <div style="background:var(--neutral-bg); border-radius:8px; padding:12px; margin-bottom:12px;">
+        <div style="font-size:12px; font-weight:600; margin-bottom:8px; color:var(--text);">Login Method</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-start;">
+          <select id="newAuthMethod" style="width:140px; font-size:13px;">
+            <option value="pin">🔢 PIN login</option>
+            <option value="password">🔑 Password login</option>
+          </select>
+          <!-- PIN fields -->
+          <div id="newPinFields" style="display:flex; gap:6px; align-items:center;">
+            <input id="newPin" placeholder="4-digit PIN" maxlength="8" type="number" style="width:130px;" />
+          </div>
+          <!-- Password fields -->
+          <div id="newPwFields" style="display:none; flex-direction:column; gap:6px;">
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <input id="newUsername" placeholder="Username (e.g. john)" style="width:160px;" />
+              <input id="newTempPw" type="password" placeholder="Temp password (min 6 chars)" style="width:200px;" />
+            </div>
+            <div style="font-size:11px; color:var(--accent);">⚠ User must change password on first login.</div>
+          </div>
+        </div>
+      </div>
+
+      <button id="addBtn" class="btn btn-primary">+ Add Staff Member</button>
+    </div>
+
+    <div id="rows"></div>
+
+    <h3 style="margin: 32px 0 10px;">Discount / Void Permissions</h3>
+    <div class="card" id="permissionsPanel" style="padding:18px;"></div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="nav.js"></script>
+  <script src="staff.js"></script>
+</body>
+</html>

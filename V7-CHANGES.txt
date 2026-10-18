@@ -1,0 +1,15 @@
+Golden POS V7 — Merge first, pay normally afterward
+
+PAYMENT WORKFLOW FIX
+- The choose-tickets modal now has no cash/card payment controls and no cash-tendered field.
+- The modal only calculates the selected ticket total and creates a merged bill.
+- After merge, the new MB-xxxx bill appears as one selectable row in the regular Payment list.
+- Original tickets already grouped in an open merged bill are hidden as separate payable rows to prevent double payment.
+- Selecting the merged bill opens the normal payment detail panel, with normal cash/card payment confirmation, discount, and print controls.
+- Merged-bill payment uses the persistent /table-bills/:id/pay endpoint; merged discounts use /table-bills/:id/discount.
+- The kitchen tickets remain separate and the unmerged tickets for that table remain available to merge into another bill.
+- Void and order-type editing are hidden/disabled for a merged bill to avoid acting on an unrelated order ID.
+
+VALIDATION
+- Inspected the changed TSX and backend route contracts.
+- A full TypeScript/Next.js build could not be verified in this environment because the project dependencies (React/Next.js) are not installed in the extracted folder. Run npm install and test on the POS machine before real payments.

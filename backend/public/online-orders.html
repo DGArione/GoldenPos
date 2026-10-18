@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Online Orders — Restaurant POS</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="page-body">
+    <div class="page-header">
+      <div>
+        <h2>Online Orders</h2>
+        <div class="subtitle">Takeaway &amp; delivery orders placed through the online form.</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <a href="online-order" target="_blank" style="font-size:12px; color:var(--accent); text-decoration:none;">↗ Open order form</a>
+        <button onclick="spaRefreshPage()" class="btn" style="font-size:12px; padding:6px 12px;" title="Refresh">↻ Refresh</button>
+      </div>
+    </div>
+    <div id="orders" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;"></div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="nav.js"></script>
+  <script src="online-orders.js"></script>
+</body>
+</html>

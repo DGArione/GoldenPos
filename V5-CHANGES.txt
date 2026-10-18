@@ -1,0 +1,27 @@
+GOLDEN POS V5 — LIVE NOTIFICATIONS, MODERN DASHBOARD, TABLE BILL SELECTION
+
+WHAT CHANGED
+1. Table payment now lets staff select any subset of unpaid dine-in tickets from the same table.
+   - Merge all tickets: select every unpaid ticket at that table.
+   - Choose tickets: select any subset (for example, 2 tickets now and the remaining 3 later).
+   - The modal calculates and displays the final amount before payment.
+   - Cash payments accept the total cash received and calculate change.
+   - Card payments use the same selected total.
+2. Combined table payment uses a new backend endpoint and a SQLite transaction. If a selected ticket cannot be settled, the combined operation rolls back instead of leaving a partially paid group.
+3. Combined payment records share a batch ID (TB-...) while individual kitchen tickets and their item details remain separate.
+4. New in-house orders and added items on an existing table tab create notifications. Existing QR and online order notifications are retained.
+5. The Next.js top bar checks notifications every 20 seconds and surfaces new unread notifications with a toast and best-effort alert sound. Desktop notifications are used only when browser permission has been granted.
+6. Dashboard hero styling has been refreshed, and the primary dashboard summary refreshes every 15 seconds.
+7. The launcher gives Node.js a 2 GB heap by default to reduce the small-heap Next.js compilation crash. If NODE_OPTIONS is already set by the user, that explicit value is respected.
+
+INSTALL
+- Stop the running POS with Ctrl+C.
+- Back up backend/data/pos.db.
+- Extract the ZIP to a new folder (recommended) or replace application files while preserving backend/data/pos.db.
+- Run npm install, then npm start.
+- Open http://localhost:3000 and hard-refresh with Ctrl+Shift+R.
+- Keep the terminal open while using the POS.
+
+NOTES
+- This is a combined settlement of multiple ticket balances in one payment action and one batch ID. Kitchen tickets and order records remain individually traceable. A separate tax-invoice/receipt document representing a single merged invoice is not introduced in this version.
+- The project source and JavaScript/TSX syntax have been checked, but a full live browser test with a restaurant database was not possible here. Test with sample tickets before taking live payments.

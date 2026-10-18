@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Payment — Restaurant POS</title>
+<link rel="stylesheet" href="style.css" />
+<style>
+.combined-modal{display:none;position:fixed;inset:0;z-index:10050;align-items:center;justify-content:center;padding:20px}.combined-modal.open{display:flex}.combined-modal-backdrop{position:absolute;inset:0;background:rgba(5,10,18,.72);backdrop-filter:blur(7px)}.combined-modal-card{position:relative;width:min(650px,100%);max-height:90vh;overflow:auto;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:22px;padding:26px;box-shadow:0 28px 90px rgba(0,0,0,.35);animation:combinedIn .2s ease-out}.combined-close{position:absolute;right:16px;top:12px;border:0;background:var(--neutral-bg);color:var(--text);border-radius:10px;width:34px;height:34px;font-size:24px;cursor:pointer}.combined-kicker{font-size:10px;letter-spacing:.16em;font-weight:800;color:var(--accent);margin-bottom:8px}.combined-modal-card h2{margin:0;font-size:24px;letter-spacing:-.03em}.combined-modal-card p{color:var(--muted);font-size:13px}.combined-ticket-choices{display:grid;gap:8px;margin:18px 0}.combined-ticket-choice{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:13px;background:var(--neutral-bg);cursor:pointer}.combined-ticket-choice:has(input:checked){border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);background:var(--accent-soft)}.combined-ticket-choice input{accent-color:var(--accent);width:18px;height:18px}.combined-ticket-main{flex:1;min-width:0}.combined-ticket-main strong{display:block;font-size:13px}.combined-ticket-main small{color:var(--muted);font-size:11px}.combined-ticket-amount{font-weight:800;font-variant-numeric:tabular-nums}.combined-total-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:17px 18px;border-radius:15px;background:linear-gradient(120deg,var(--accent-soft),var(--neutral-bg));border:1px solid var(--border)}.combined-total-row span{font-size:12px;color:var(--muted)}.combined-total-row strong{font-size:28px;color:var(--accent);font-variant-numeric:tabular-nums}.combined-pay-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}.combined-pay-controls label{display:grid;gap:6px;font-size:11px;font-weight:700;color:var(--muted)}.combined-pay-controls select,.combined-pay-controls input{width:100%;padding:11px 12px;border-radius:11px;border:1px solid var(--border);background:var(--panel);color:var(--text);font:inherit}.combined-change-row{display:flex;justify-content:space-between;margin-top:12px;padding:12px 2px;font-size:13px}.combined-change-row strong{color:var(--success);font-variant-numeric:tabular-nums}.combined-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.combined-note{font-size:11px!important;margin-bottom:0}.table-bill-card{padding:15px;border-radius:16px;border:1px solid var(--border);background:linear-gradient(145deg,var(--panel),var(--neutral-bg));margin-bottom:12px}.table-bill-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.table-bill-title{font-weight:800;font-size:14px}.table-bill-sub{font-size:11px;color:var(--muted);margin-top:4px}.table-bill-total{font-weight:900;color:var(--accent);font-size:17px;white-space:nowrap}.table-bill-tickets{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}.table-ticket-chip{font-size:11px;border:1px solid var(--border);border-radius:8px;padding:5px 8px;background:var(--panel)}.table-bill-actions{display:flex;gap:8px;flex-wrap:wrap}.table-bill-actions .btn{flex:1;min-width:145px}.payment-main-content .page-header{padding:15px 17px;border-radius:16px;background:linear-gradient(120deg,color-mix(in srgb,var(--accent) 14%,var(--panel)),var(--panel));border:1px solid var(--border);margin-bottom:18px}.payment-main-content #readyList{gap:9px!important}.pay-row{transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease!important}.pay-row:hover{transform:translateY(-1px);box-shadow:var(--shadow-md);border-color:var(--accent)!important}@keyframes combinedIn{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}@media(max-width:650px){.combined-modal-card{padding:20px}.combined-pay-controls{grid-template-columns:1fr}.combined-total-row strong{font-size:22px}.table-bill-actions .btn{min-width:100%}}
+</style>
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="page-body page-body--fullscreen" style="flex-direction:row;">
+    <div style="flex:1; padding: 22px; overflow-y:auto;">
+      <div class="payment-main-content">
+      <div class="page-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <h2>Payment</h2>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button id="refreshPayBtn" class="btn" style="font-size:12px; padding:6px 12px;">↻ Refresh</button>
+          <button id="lastReceiptBtn" class="btn">🧾 Last Receipt</button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:14px 16px; margin-bottom:18px;">
+        <div style="font-size:12px; font-weight:600; margin-bottom:6px;">Check Order Status <span style="font-weight:400; color:var(--muted);">— customer asking "is my order ready?"</span></div>
+        <div style="display:flex; gap:8px;">
+          <input id="orderLookupInput" type="number" placeholder="Order # e.g. 42" style="flex:1; max-width:160px;" />
+          <button id="orderLookupBtn" class="btn btn-primary">Check</button>
+        </div>
+        <div id="orderLookupResult" style="margin-top:10px;"></div>
+      </div>
+      <div style="font-size:11.5px; color:var(--muted); margin:-4px 2px 12px;">
+        ⌨ Keyboard: <kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> open · <kbd>1</kbd>–<kbd>9</kbd> jump · type amount · <kbd>Enter</kbd> pay · <kbd>Esc</kbd> back
+      </div>
+      <div id="readyList" style="display:flex; flex-direction:column; gap:10px;"></div>
+      </div> <!-- end payment-main-content -->
+    </div>
+
+    <div class="card" id="detailPanel" style="width: 400px; flex-shrink:0; border-radius:0; border-top:none; border-bottom:none; border-right:none; display:none; overflow-y:auto; box-shadow:none; flex-direction:column;">
+
+      <!-- Order summary header -->
+      <div style="padding:18px 20px 0;">
+        <h3 id="detailTitle" style="margin:0 0 2px;"></h3>
+        <div id="detailServer" style="font-size:12px; color:var(--muted); margin-bottom:2px;"></div>
+        <div id="detailKitchenStatus" style="font-size:12px; color:var(--muted); margin-bottom:2px;"></div>
+        <div id="detailNote" style="font-size:12px; color:var(--warning); margin-bottom:10px;"></div>
+        <div id="detailItems" class="mono" style="font-size:12px; margin-bottom:10px; max-height:120px; overflow-y:auto;"></div>
+
+        <div class="mono" style="border-top:1px solid var(--border); padding-top:10px; font-size:13px;">
+          <div style="display:flex; justify-content:space-between;"><span>Subtotal</span><span id="dSubtotal"></span></div>
+          <div id="dDiscountRow" style="display:none; justify-content:space-between; color:var(--danger);"><span id="dDiscountLabel">Discount</span><span id="dDiscountAmt"></span></div>
+          <div id="dPromoRow" style="display:none; justify-content:space-between; color:var(--accent);"><span id="dPromoLabel">Promotion</span><span id="dPromoAmt"></span></div>
+          <div style="display:flex; justify-content:space-between;"><span>Service Charge</span><span id="dServiceCharge"></span></div>
+          <div style="display:flex; justify-content:space-between;"><span>VAT</span><span id="dVat"></span></div>
+          <div style="display:flex; justify-content:space-between; font-weight:700; font-size:17px; padding-top:4px;"><span>Bill Total</span><span id="dTotal"></span></div>
+          <div id="dTipRow" style="display:none; justify-content:space-between; color:var(--accent);"><span>Tip 🎁</span><span id="dTipAmt"></span></div>
+          <div id="dGrandTotalRow" style="display:none; justify-content:space-between; font-weight:800; font-size:19px; padding-top:4px; border-top:2px solid var(--accent); margin-top:4px;"><span>Grand Total</span><span id="dGrandTotal" style="color:var(--accent);"></span></div>
+          <div style="display:flex; justify-content:space-between; color:var(--muted); margin-top:6px;"><span>Paid so far</span><span id="dPaid"></span></div>
+          <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--accent);"><span>Balance due</span><span id="dBalance"></span></div>
+        </div>
+        <div id="paymentsLog" style="font-size:11px; color:var(--muted); margin-top:8px;"></div>
+        <div id="actionRow" style="display:flex; gap:8px; margin-top:12px;">
+          <button class="btn" id="discountBtn" style="flex:1;">Discount</button>
+          <button class="btn btn-danger" id="voidBtn" style="flex:1;">Void</button>
+        </div>
+      </div>
+
+      <!-- Cash tender / dialpad section -->
+      <div id="payEntry" style="padding:14px 20px 20px; border-top:1px solid var(--border-soft); margin-top:14px;">
+
+        <!-- Tendered display -->
+        <div style="background:var(--neutral-bg); border-radius:var(--radius-md); padding:14px 16px; margin-bottom:12px;">
+          <div style="font-size:11px; color:var(--muted); margin-bottom:4px; font-weight:600;">Customer pays</div>
+          <div id="tenderedDisplay" style="font-size:28px; font-weight:700; font-family:monospace; letter-spacing:1px; min-height:38px;">0.00</div>
+        </div>
+
+        <!-- Quick amounts row -->
+        <div id="quickAmounts" style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:10px;"></div>
+
+        <!-- Dialpad -->
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:10px;">
+          <button class="dialpad-btn" data-key="1">1</button>
+          <button class="dialpad-btn" data-key="2">2</button>
+          <button class="dialpad-btn" data-key="3">3</button>
+          <button class="dialpad-btn" data-key="4">4</button>
+          <button class="dialpad-btn" data-key="5">5</button>
+          <button class="dialpad-btn" data-key="6">6</button>
+          <button class="dialpad-btn" data-key="7">7</button>
+          <button class="dialpad-btn" data-key="8">8</button>
+          <button class="dialpad-btn" data-key="9">9</button>
+          <button class="dialpad-btn" data-key=".">.</button>
+          <button class="dialpad-btn" data-key="0">0</button>
+          <button class="dialpad-btn" data-key="back" style="color:var(--danger);">⌫</button>
+        </div>
+
+        <!-- Change display -->
+        <div id="changeRow" style="display:flex; justify-content:space-between; align-items:center; background:var(--success-bg); border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:12px; font-weight:700; font-size:15px;">
+          <span>Balance</span><span id="changeDisplay" style="font-family:monospace;">—</span>
+        </div>
+
+        <!-- Loyalty (shown only when the add-on is on and a customer is attached) -->
+        <div id="loyaltyRow" style="display:none; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; background:var(--accent-soft); border-radius:var(--radius-sm); padding:9px 12px;">
+          <span id="loyaltyInfo" style="font-size:12px; color:var(--accent-dark); font-weight:600;"></span>
+          <button class="btn btn-sm" id="loyaltyRedeemBtn" style="font-size:12px; white-space:nowrap;">💛 Redeem</button>
+        </div>
+
+        <!-- Gift card tender (shown only when the add-on is on) -->
+        <div id="giftcardRow" style="display:none; margin-bottom:10px;">
+          <button class="btn" id="giftcardBtn" style="width:100%; font-size:13px;">🎁 Pay with Gift Card</button>
+        </div>
+
+        <!-- Order type — chosen here, then method below -->
+        <div id="orderTypeRow" style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+          <span style="font-size:12px; color:var(--muted); font-weight:600; white-space:nowrap;">Order type</span>
+          <select id="orderTypeSelect" style="flex:1; font-size:14px; padding:9px 11px;">
+            <option value="dine-in">🍽️ Dine-in</option>
+            <option value="takeaway">🥡 Take Away</option>
+            <option value="delivery">🛵 Delivery</option>
+          </select>
+        </div>
+
+        <!-- Payment method: dropdown + single confirm button -->
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+          <span style="font-size:12px; color:var(--muted); font-weight:600; white-space:nowrap;">Method</span>
+          <select id="payMethodSelect" style="flex:1; font-size:14px; padding:9px 11px;">
+            <option value="cash">💵 Cash</option>
+            <option value="card">💳 Card</option>
+            <option value="online">🏦 Online Transfer</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="payConfirmBtn" style="width:100%; padding:14px; font-size:15px; font-weight:700;">
+          Record Payment
+        </button>
+      </div>
+
+      <!-- Paid state -->
+      <div id="paidState" style="display:none; text-align:center; padding:20px;">
+        <div style="font-size:40px; margin-bottom:8px;">✅</div>
+        <p style="color:var(--success); font-weight:700; font-size:18px; margin:0 0 4px;">Paid in full</p>
+        <div id="changeSummary" style="font-size:26px; font-weight:700; font-family:monospace; margin-bottom:16px; color:var(--accent);"></div>
+        <a id="receiptLink" class="btn btn-primary" style="display:block; text-decoration:none; padding:13px; font-size:15px; margin-bottom:10px;">🖨️ Print Receipt</a>
+      </div>
+
+      <!-- Print bill button -->
+      <div id="printBillRow" style="padding:0 20px 20px; display:none;">
+        <a id="printBillLink" class="btn" style="display:block; text-decoration:none; padding:11px; text-align:center; font-size:13px;">🧾 Print Bill / Receipt</a>
+      </div>
+
+      <!-- Refund (shown when the order has been paid into) -->
+      <div id="refundRow" style="padding:0 20px 20px; display:none;">
+        <button class="btn btn-danger" id="refundBtn" style="width:100%; padding:11px; font-size:13px;">↩ Refund</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="combinedBillModal" class="combined-modal" aria-hidden="true">
+    <div class="combined-modal-backdrop" data-combined-close></div>
+    <section class="combined-modal-card" role="dialog" aria-modal="true" aria-labelledby="combinedBillTitle">
+      <button type="button" class="combined-close" data-combined-close aria-label="Close">×</button>
+      <div class="combined-kicker">TABLE SETTLEMENT</div>
+      <h2 id="combinedBillTitle">Combine table tickets</h2>
+      <p id="combinedBillSubtitle">Select tickets to include in this bill.</p>
+      <div id="combinedTicketChoices" class="combined-ticket-choices"></div>
+      <div class="combined-total-row"><span>New merged bill total</span><strong id="combinedFinalAmount">Rs. 0.00</strong></div>
+      <div class="combined-actions"><button type="button" class="btn" data-combined-close>Cancel</button><button type="button" class="btn btn-primary" id="mergeSelectedBtn">Merge selected tickets</button></div>
+      <p class="combined-note">This creates one bill in the Payment list. Kitchen tickets stay separate. Select the merged bill to apply a discount, print the bill, and pay using the normal payment screen.</p>
+    </section>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="nav.js"></script>
+  <script src="printing.js"></script>
+  <script src="payment.js"></script>
+</body>
+</html>

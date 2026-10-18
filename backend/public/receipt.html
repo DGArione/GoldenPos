@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Receipt</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #f4f4f4; font-family: "Courier New", Courier, monospace; }
+
+  /* Screen wrapper — centers the receipt */
+  .screen-wrap {
+    max-width: 380px; margin: 28px auto; padding: 0 0 40px;
+  }
+  .no-print {
+    display: flex; gap: 10px; padding: 14px 8px; background: #fff;
+    border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 10;
+  }
+  .no-print a, .no-print button {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 6px; font-size: 13px;
+    font-family: -apple-system, sans-serif; cursor: pointer;
+    text-decoration: none; border: 1px solid #ddd; background: #fff;
+    color: #333; font-weight: 600;
+  }
+  .no-print .btn-primary { background: #8a5a34; color: white; border-color: #8a5a34; }
+
+  /* The receipt itself */
+  .receipt {
+    background: white;
+    padding: 24px 22px 20px;
+    font-size: 13px;
+    line-height: 1.6;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  }
+  .receipt-header { text-align: center; margin-bottom: 14px; }
+  .receipt-logo { font-size: 28px; margin-bottom: 4px; }
+  .receipt-biz-name { font-size: 18px; font-weight: 700; letter-spacing: 1px; }
+  .receipt-meta { font-size: 11px; color: #666; margin-top: 2px; }
+
+  .dashed { border: none; border-top: 1px dashed #bbb; margin: 10px 0; }
+  .solid  { border: none; border-top: 1px solid #333; margin: 10px 0; }
+
+  .row { display: flex; justify-content: space-between; }
+  .row.bold { font-weight: 700; }
+  .row.total-row { font-size: 16px; font-weight: 700; margin-top: 4px; padding-top: 6px; border-top: 1px solid #333; }
+  .row.change-row { font-size: 15px; font-weight: 700; color: #2a7a3b; }
+  .row.muted { color: #888; font-size: 11px; }
+
+  .item-name { flex: 1; padding-right: 6px; }
+  .item-mod { font-size: 11px; color: #888; padding-left: 12px; }
+  .item-note { font-size: 11px; color: #b5651d; padding-left: 12px; }
+
+  .badge-row { display: flex; justify-content: center; margin: 8px 0; }
+  .badge-pill {
+    display: inline-block; border: 1px solid #333; border-radius: 20px;
+    padding: 2px 12px; font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  }
+  .badge-paid { border-color: #2a7a3b; color: #2a7a3b; }
+  .badge-unpaid { border-color: #b23b30; color: #b23b30; }
+
+  .receipt-footer { text-align: center; font-size: 11px; color: #888; margin-top: 14px; line-height: 1.8; }
+  .receipt-footer .thank-you { font-size: 13px; font-weight: 700; color: #333; letter-spacing: 2px; }
+  .receipt-tagline { font-size: 11px; color: #666; font-style: italic; margin-top: 2px; }
+
+  .barcode-area { text-align: center; margin: 10px 0 6px; }
+  .barcode-lines { font-size: 18px; letter-spacing: -1px; color: #333; line-height: 1; }
+  .barcode-num { font-size: 9px; color: #aaa; letter-spacing: 3px; margin-top: 2px; }
+
+  .row.balance-row { font-weight: 700; color: #b23b30; font-size: 15px; }
+  .row.change-row  { font-weight: 700; color: #2a7a3b; font-size: 14px; }
+
+  /* Print: hide chrome, only print the receipt */
+  @media print {
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: white; }
+    .no-print { display: none !important; }
+    .screen-wrap { max-width: none; margin: 0; padding: 0; }
+    .receipt { box-shadow: none; padding: 8mm 10mm; font-size: 12px; }
+    .receipt-biz-name { font-size: 16px; }
+    .row.total-row { font-size: 15px; }
+    .row.change-row { font-size: 14px; }
+    @page { margin: 5mm; size: 80mm auto; }
+  }
+</style>
+</head>
+<body>
+  <div class="screen-wrap">
+    <div class="no-print">
+      <a href="#" onclick="history.back(); return false;">← Back</a>
+      <button class="btn-primary" onclick="window.print()">🖨️ Print Receipt</button>
+    </div>
+    <div class="receipt" id="receipt">Loading…</div>
+  </div>
+  <script src="auth.js"></script>
+  <script src="receipt.js"></script>
+</body>
+</html>

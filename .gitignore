@@ -1,0 +1,17 @@
+# Dependencies & builds
+node_modules/
+web/.next/
+*.tsbuildinfo
+# Live data — never commit (customer data, sales, secrets)
+backend/data/
+backend/storage-config.json
+backend/storage-move-result.json
+logs/
+_backup-before-changes-*/
+# Binaries / tools
+tools/
+*.exe
+# Secrets
+*.key
+secret.txt
+.env*

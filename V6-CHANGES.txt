@@ -1,0 +1,22 @@
+Golden POS V6 — Merged Table Bills + Modern Owner Dashboard
+
+PAYMENT / TABLE BILLING
+- Table payment groups now have only two merge actions: Merge all, or Choose tickets to merge.
+- Choosing tickets creates a persistent merged bill in the database; the original kitchen orders remain separate.
+- A merged bill appears as one selectable ticket in the normal Payment list with its calculated final amount.
+- Selecting the merged bill uses the regular payment detail panel, cash/card/online method, tender keypad, and confirmation workflow.
+- Merged bills support percent or fixed discounts, reasons, manager approval PIN rules, editing, and removal before payment begins.
+- Partial payments are allocated across the member tickets and fully-paid member tickets remain traceable as individual kitchen orders.
+- A merged bill can be printed from the Payment panel. This is a combined bill printout, not a separate fiscal invoice number.
+- Table bills are persisted in SQLite. The schema migration is additive and does not replace existing restaurant data.
+
+DASHBOARD
+- Redesigned the Owner Dashboard with a modern, light business-intelligence layout inspired by the supplied reference: colorful KPI cards, sales trend chart, weekday bars, payment donut, product/category tables, employee performance, and quick links.
+- Preserves existing dashboard/report API data and period filters.
+
+VALIDATION PERFORMED
+- JavaScript syntax checks passed for backend/src/api.js, backend/src/db.js, and backend/public/payment.js.
+- Fresh SQLite schema migration confirmed table_bills is created and the seed menu has 142 items.
+- Direct API workflow test passed: create two tickets, merge, apply discount, and settle merged bill.
+- Five-ticket test passed: merge two tickets into one bill and three into another; apply/remove discount; settle a merged bill.
+- Dashboard TSX was parsed by TypeScript; full Next.js build/browser testing could not be run here because project npm dependencies are not installed in this environment.

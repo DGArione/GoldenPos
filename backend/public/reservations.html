@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reservations — Restaurant POS</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="navbar"></div>
+  <div class="page-body">
+    <div class="page-header">
+      <div>
+        <h2>Reservations</h2>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <input id="resvDate" type="date" />
+        <button id="newResvBtn" class="btn btn-primary">+ New Booking</button>
+      </div>
+    </div>
+
+    <div id="resvStats" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; margin-bottom:20px;"></div>
+    <div id="resvList"></div>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="nav.js"></script>
+  <script src="reservations.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+GOLDEN POS - OPEN ON OTHER DEVICES ON THE SAME WIFI/LAN
+
+1. Run npm start on the POS computer.
+2. On that computer, run ipconfig (Windows) and find the active Wi-Fi/Ethernet IPv4 Address, e.g. 192.168.1.25.
+3. On another device connected to the same network, open http://192.168.1.25:3000 (replace with your computer's actual IPv4 address).
+4. If it still does not open, allow Node.js through Windows Defender Firewall on Private networks, or add inbound TCP rules for ports 3000 and 3001.
+5. Ensure both devices are on the same router/network and that guest Wi-Fi/client isolation is disabled.
+
+Do not expose these ports directly to the public internet. This is intended for a trusted local network.

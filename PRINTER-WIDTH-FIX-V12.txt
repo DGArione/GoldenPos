@@ -1,0 +1,15 @@
+GOLDEN POS V12 — FULL-WIDTH KITCHEN PRINT FIX
+
+This update changes the Windows RAW ESC/POS print agent to explicitly set an 80 mm printable area (576 dots) and zero left margin for every print job. Kitchen item lines are printed left-aligned, bold, and double-size. Automatic cutting remains at the end of the same RAW print job.
+
+INSTALL / TEST
+1. Back up the current Golden POS folder and database.
+2. Extract this ZIP into a new folder.
+3. Stop the currently running Golden POS/print-agent process completely. An old agent still running on port 9110 will continue using old code.
+4. Start Golden POS from the new folder using its normal start procedure.
+5. In Printer Management, confirm 80 mm paper and the XP-80 kitchen printer, then save.
+6. Print one test kitchen order and verify width, font, and cutting.
+
+NOTES
+- The print head's actual printable width depends on the exact printer model and firmware. 576 dots is the common 80 mm / 203 dpi ESC/POS width. If the printer is a 58 mm unit, change the width command to 384 dots instead.
+- Test one ticket before live service. Raw ESC/POS support and cutter behavior depend on the Windows printer queue and model.

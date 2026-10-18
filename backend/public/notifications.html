@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Notifications — Restaurant POS</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="navbar"></div>
+  <div class="page-body">
+    <div class="page-header">
+      <div>
+        <h2>Notifications</h2>
+        <div class="subtitle">Alerts and updates for you and your branch.</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <select id="notifFilter" style="width:160px;">
+          <option value="all">All</option>
+          <option value="unread">Unread only</option>
+        </select>
+        <button id="notifMarkAllBtn" class="btn">Mark all read</button>
+      </div>
+    </div>
+    <div id="notifPageList"></div>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="nav.js"></script>
+  <script src="notifications.js"></script>
+</body>
+</html>

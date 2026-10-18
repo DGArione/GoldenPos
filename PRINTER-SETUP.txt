@@ -1,0 +1,33 @@
+GOLDEN POS V8 — DUAL WINDOWS USB PRINTER SETUP
+
+1. Connect both USB printers to the Windows POS computer.
+2. Open Windows Settings > Bluetooth & devices > Printers & scanners.
+3. Install both printer drivers and print a Windows test page for each printer.
+4. Start Golden POS with npm start. The local print agent starts automatically on http://localhost:9110.
+5. Log in to Golden POS as an administrator and open Settings > Printer management.
+6. Click Refresh printer list.
+7. Select the kitchen printer for KOT tickets.
+8. Select the payment printer for bills and receipts.
+9. Enable Direct thermal printing and click Save printer settings.
+10. Click Test kitchen printer and Test payment printer.
+11. Configure each printer's paper size in Windows Printing Preferences (58 mm or 80 mm as appropriate).
+
+ROUTING
+- New staff order sent to kitchen -> selected kitchen printer (KOT).
+- Customer bill/receipt print -> selected payment printer.
+- If direct printing is disabled or no printer is selected, receipt printing falls back to the browser print window; automatic KOT printing is not sent through the agent.
+
+NOTES
+- Printer discovery and direct routing are intended for Windows printers installed on the same computer running Golden POS.
+- The print agent binds to 127.0.0.1 (this computer only); do not change this unless you intentionally want to expose a local print service to the network.
+- Windows driver settings control receipt paper size and auto-cut behavior. Test both printers before opening to customers.
+- Existing backend/data/pos.db is not included as a replacement. Back up and preserve your own database during upgrades.
+
+AUTOMATIC PAPER CUT (Windows)
+-----------------------------
+The print agent now submits the ticket through the selected Windows printer and
+then submits the Xprinter ESC/POS partial-cut command as a RAW spool job. This
+requires a cutter-capable printer and a Windows printer queue that accepts RAW
+jobs. Test with a new kitchen order after restarting the print agent. If the
+paper still does not cut, verify the exact model's cutter command and driver
+queue settings; the XPrinter V3.6C utility's Cut Paper test should work first.

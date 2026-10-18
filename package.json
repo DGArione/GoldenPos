@@ -1,0 +1,19 @@
+{
+  "name": "golden-pos",
+  "version": "2.2.0",
+  "private": true,
+  "description": "Golden Beach Restaurant POS \u2014 Golden POS UI (orange brand, floating sidebar) on top of the full-feature Node + SQLite backend (branches, inventory, loyalty, gift cards, payroll, reservations, promotions and more).",
+  "scripts": {
+    "postinstall": "npm --prefix backend install && npm --prefix web install",
+    "start": "node start.js",
+    "start:dev": "node start.js --dev",
+    "start:classic": "npm --prefix backend start",
+    "build:web": "npm --prefix web run build",
+    "backup": "node backend/src/backup.js --now",
+    "dev:web": "BACKEND_URL=http://localhost:3001 npm --prefix web run dev",
+    "dev:backend": "PORT=3001 npm --prefix backend start"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}

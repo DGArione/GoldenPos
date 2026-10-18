@@ -1,0 +1,17 @@
+Golden POS V4 — Dashboard & Reports enhancements
+
+Implemented in the actual Golden POS Next.js UI and backend API:
+- Dashboard date-range business analytics panel with Load action.
+- Period KPIs: net sales, paid orders, average order, discounts, inventory purchases, recorded stock consumption.
+- Sales breakdown by order type, menu category, and employee.
+- Reports page now includes sales by order type and sales by employee.
+- CSV export includes the new order-type and employee breakdowns.
+- Existing reports remain: payment method, hourly sales, top items, categories, weekday performance, waste, voids, modifiers, dead stock, inventory purchase/consumption, PDF/print export.
+- Classic HTML dashboard and reports also include the period analytics and order-type/employee report sections.
+
+Data accuracy notes:
+- Revenue and order-type/employee analytics are calculated from paid orders in the selected date range.
+- Inventory purchases and consumption reflect records already present in the inventory system.
+- Food cost %, gross profit, net profit, labor cost, forecasts, customer retention, and tax analytics are not fabricated. They require reliable recipe costs, operating-expense/payroll records, customer history, and/or tax configuration before they can be reported accurately.
+
+Install/run using the existing project instructions. Preserve backend/data/pos.db when replacing application files; back it up first.

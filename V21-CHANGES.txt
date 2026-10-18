@@ -1,0 +1,48 @@
+GOLDEN POS V21 - BUG FIXES
+==========================
+
+1. GIFT CARD PRINT  - prints ONLY a large CODE128 barcode + the code, using the
+   printer's own barcode command (sharpest). Barcodes are generated offline.
+2. EDIT USERS       - new "Edit" button: name, role, pay, new PIN, delete.
+   Managers can now reset PINs for staff below them.
+3. GIFT CARD AT PAYMENT - amount is now deducted on screen (the reply was being
+   read wrongly). Works on combined/merged table bills too. Fully covered bills
+   print automatically. The printed bill shows the gift card line and the
+   correct change.
+4. NOTIFICATIONS    - large pop-up at the bottom (10 s, tap to close, sound).
+   Bell shows unread notifications + unread messages; counts were wrong for
+   owners/admins and are now consistent. Tap a notification to mark it read.
+   Checks every 8 s.
+5. KITCHEN TICKETS  - full item names: item lines were mistaken for the order
+   number (printed extra-wide and cut to 24 characters). Long names, notes and
+   modifiers now wrap. Bills also show full names.
+6. LOGO             - bigger in the sidebar (44 px) and on the PIN screen (64 px).
+7. LOCK SCREEN      - after a POS/PC/browser restart the PIN screen is shown,
+   never the dashboard. Refreshing the page keeps you signed in.
+8. ADMIN PAGE       - "Back to main page", status cards, health check as
+   green/amber/red, backup list + real "Back up now" (it only stored a date
+   before), downloads save a file instead of showing code, in-app confirms.
+9. QR TABLE ORDERING
+   - QR codes generated offline (no internet needed).
+   - Printable table cards: "join Wi-Fi" QR + "menu & order" QR.
+   - Settings shows this computer's current address, "Use this computer's
+     address" button, Wi-Fi name/password, and a red warning if the IP changed
+     (also in Health check and the QR window).
+   - New table orders alert cashiers and waiters (were managers only); cashiers
+     and waiters now have Online Orders > Table Orders > Accept & send to kitchen.
+   - Fix for changing IP: reserve the IP in the router - see
+     HOSTING-LOCAL-WINDOWS.md > "Table QR ordering".
+
+New library: qrcode-generator (installed automatically on next start/install).
+Database: two new settings columns (wifiSsid, wifiPassword) added automatically.
+
+10. CUSTOMERS ON MOBILE DATA (online QR ordering)
+   - New customer-only gateway (backend/public-gateway/gateway.js, port 3100,
+     started automatically): exposes ONLY the table menu page, menu, place
+     order and reservation. Everything else returns 404 (staff pages, login,
+     admin, create-admin, exports, printer). Rate limits: 8 orders / 10 min per
+     phone, 30 / hour per table. No cookies or server headers leak.
+   - SETUP-ONLINE-ORDERING.cmd: publishes the gateway through a secure tunnel
+     (Cloudflare Tunnel with your domain, or Tailscale Funnel without one, or a
+     temporary test link). Runs as a Windows service; no router changes.
+   - Customer confirmation now says the cashier will send it to the kitchen.

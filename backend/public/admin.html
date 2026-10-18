@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Menu Admin — Restaurant POS</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="page-body narrow" style="max-width:1100px;">
+    <div class="page-header">
+      <h2>Menu Management</h2>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div id="branchPickerRow" style="display:none;align-items:center;gap:8px;">
+          <span style="font-size:12px;color:var(--muted);font-weight:600;">Branch:</span>
+          <select id="menuBranchSelect" style="font-size:13px;"></select>
+        </div>
+        <button onclick="spaRefreshPage()" class="btn" style="font-size:12px;padding:6px 12px;">↻ Refresh</button>
+      </div>
+    </div>
+
+    <div class="tabs" id="adminTabs" style="margin-bottom:24px;">
+      <button class="tab active" data-tab="items">🍽 Items</button>
+      <button class="tab" data-tab="categories">📋 Categories</button>
+      <button class="tab" data-tab="stations">🔥 Stations</button>
+    </div>
+
+    <!-- ITEMS -->
+    <div id="tabItems">
+      <div class="tab-header">
+        <h3 id="itemsCount">Items</h3>
+        <button class="btn btn-primary" id="openAddItemBtn" style="padding:9px 18px;">＋ Create Item</button>
+      </div>
+      <div class="items-grid" id="menuList"></div>
+    </div>
+
+    <!-- CATEGORIES -->
+    <div id="tabCategories" style="display:none;">
+      <div class="tab-header">
+        <h3 id="catsCount">Categories</h3>
+        <button class="btn btn-primary" id="openAddCatBtn" style="padding:9px 18px;">＋ Add Category</button>
+      </div>
+      <div class="cat-grid" id="categoryList"></div>
+    </div>
+
+    <!-- STATIONS -->
+    <div id="tabStations" style="display:none;">
+      <div class="tab-header">
+        <h3 id="stationsCount">Stations</h3>
+        <button class="btn btn-primary" id="openAddStationBtn" style="padding:9px 18px;">＋ Add Station</button>
+      </div>
+      <div class="st-grid" id="stationList"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="nav.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
