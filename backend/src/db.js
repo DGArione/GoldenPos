@@ -686,6 +686,8 @@ function seedIfEmpty() {
   `);
 
   seedGoldenBeachMenu();
+  // Demo pictures for the seeded menu, logo, login screen and banners (new installs only).
+  try { require('./sample-images').applySampleImages(db); } catch (e) { console.warn('[db] sample pictures skipped:', e.message); }
 
   console.log('[db] Seeded Golden Beach Restaurant (1 branch, full menu, 6 users).');
 }
